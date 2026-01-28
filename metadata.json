@@ -1,0 +1,7 @@
+{
+  "name": "Backup of StampLink Loyalty",
+  "description": "A real-time loyalty program application where admins scan member QR codes to award stamps instantly.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

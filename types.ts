@@ -1,0 +1,26 @@
+export interface User {
+  id: string;
+  username: string;
+  password?: string; // Stored in DB
+  name: string; // Display name
+  email: string;
+  phone: string;
+  address?: string;
+  birthDate?: string;
+  stamps: number;
+  maxStamps: number;
+  history: StampEvent[];
+}
+
+export interface StampEvent {
+  id: string;
+  timestamp: number;
+  type: 'add' | 'redeem';
+  amount: number;
+}
+
+export enum AppRole {
+  NONE = 'NONE',
+  MEMBER = 'MEMBER',
+  ADMIN = 'ADMIN'
+}
