@@ -1,21 +1,22 @@
 import React, { useState } from 'react';
-import { Coffee, ArrowRight, Lock, Mail, User as UserIcon, AlertCircle, Phone, MapPin, Calendar, Loader2 } from 'lucide-react';
-import { loginUser, registerUser, setAdminSession } from '../services/storage';
+import { Coffee, ArrowRight, Mail, User as UserIcon, AlertCircle, Phone, MapPin, Calendar, Loader2, Globe, Sparkles } from 'lucide-react';
+import { loginUser, registerUser } from '../services/storage';
 import { User } from '../types';
+import { getBrandConfig } from '../services/branding';
 
 interface AuthViewProps {
   onLogin: (user: User | null, isAdmin: boolean) => void;
 }
 
-const InputField = ({ 
-  label, type, value, onChange, placeholder, icon: Icon, required = false 
-}: { 
+const InputField = ({
+  label, type, value, onChange, placeholder, icon: Icon, required = false
+}: {
   label: string, type: string, value: string, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void, placeholder: string, icon: React.ElementType, required?: boolean
 }) => (
   <div className="space-y-1.5">
     <label className="block text-sm font-bold text-gray-900 tracking-tight">{label} {required && <span className="text-red-500">*</span>}</label>
-    <div className="relative">
-      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
+    <div className="relative group">
+      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 group-focus-within:text-brand-500 transition-colors">
         <Icon size={18} />
       </div>
       <input
@@ -23,7 +24,7 @@ const InputField = ({
         value={value}
         onChange={onChange}
         required={required}
-        className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 bg-gray-50 text-gray-900 placeholder:text-gray-400 focus:bg-white focus:border-brand-600 focus:ring-4 focus:ring-brand-50 outline-none transition-all font-medium"
+        className="w-full pl-10 pr-4 py-3.5 rounded-xl border-2 border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-100 outline-none transition-all font-medium hover:border-gray-300"
         placeholder={placeholder}
       />
     </div>
@@ -34,48 +35,96 @@ export const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
   const [isRegistering, setIsRegistering] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const brandConfig = getBrandConfig();
+
+  // Shared fields
+  const [countryCode, setCountryCode] = useState('62');
+  const [phone, setPhone] = useState('');
+  const [birthDate, setBirthDate] = useState('');
+
+  // Registration fields
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
-  const [birthDate, setBirthDate] = useState('');
+
+  // Handle phone number input - only allow digits, no leading 0
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value;
+    value = value.replace(/\D/g, '');
+    value = value.replace(/^0+/, '');
+    const maxLength = 12;
+    if (value.length > maxLength) {
+      value = value.substring(0, maxLength);
+    }
+    setPhone(value);
+  };
+
+  // Handle birth date input - format as dd/mm/yyyy
+  const handleBirthDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value;
+    value = value.replace(/\D/g, '');
+    if (value.length >= 2) {
+      value = value.substring(0, 2) + '/' + value.substring(2);
+    }
+    if (value.length >= 5) {
+      value = value.substring(0, 5) + '/' + value.substring(5, 9);
+    }
+    setBirthDate(value);
+  };
+
+  // Convert dd/mm/yyyy to yyyy-mm-dd for backend
+  const convertDateFormat = (ddmmyyyy: string): string => {
+    if (ddmmyyyy.length !== 10) return ddmmyyyy;
+    const [day, month, year] = ddmmyyyy.split('/');
+    return `${year}-${month}-${day}`;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
 
-    // Trim inputs for safety
-    const safeUser = username.trim();
-    const safePass = password.trim();
-
-    if (safeUser.toLowerCase() === 'admin' && safePass === 'admin123') {
-      setAdminSession(); // Persist Admin Session
-      onLogin(null, true);
-      setIsLoading(false);
-      return;
-    }
-
     try {
       if (isRegistering) {
-        if (!safeUser || !email || !safePass || !name || !phone) {
+        if (!name || !email || !phone) {
           setError('Please fill in all required fields.');
           setIsLoading(false);
           return;
         }
-        const newUser = await registerUser({ username: safeUser, name, email, phone, address, birthDate, password: safePass });
+
+        if (phone.length < 8) {
+          setError('Please enter a valid phone number.');
+          setIsLoading(false);
+          return;
+        }
+
+        const fullPhone = countryCode + phone;
+        const formattedBirthDate = birthDate ? convertDateFormat(birthDate) : '';
+
+        const newUser = await registerUser({
+          name,
+          email,
+          phone: fullPhone,
+          address,
+          birthDate: formattedBirthDate
+        });
         onLogin(newUser, false);
       } else {
-        const user = await loginUser(safeUser, safePass);
+        const fullPhone = countryCode + phone;
+
+        if (!fullPhone || !birthDate) {
+          setError('Please enter both phone number and birth date.');
+          setIsLoading(false);
+          return;
+        }
+
+        const formattedBirthDate = convertDateFormat(birthDate);
+        const user = await loginUser(fullPhone, formattedBirthDate);
         if (user) {
           onLogin(user, false);
         }
       }
     } catch (err: any) {
-      // Display the actual error from storage.ts (which could be network error or invalid password)
       setError(err.message || 'Authentication failed. Check connection.');
     } finally {
       setIsLoading(false);
@@ -83,54 +132,115 @@ export const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
   };
 
   return (
-    <div className="w-full max-w-md bg-white rounded-[2rem] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-500 ring-1 ring-black/5 my-8">
-      <div className="bg-coffee-900 p-8 text-center relative overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-brand-500/20 rounded-full blur-3xl" />
+    <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-700 ring-1 ring-black/5 my-8 backdrop-blur-xl">
+      {/* Header with gradient */}
+      <div className="relative p-8 text-center overflow-hidden bg-gradient-to-br from-brand-600 via-brand-500 to-brand-700">
+        {/* Animated background elements */}
+        <div className="absolute top-0 left-1/4 w-72 h-72 bg-white/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute -bottom-10 -right-10 w-64 h-64 bg-brand-400/20 rounded-full blur-3xl" />
+
         <div className="relative z-10">
-          <div className="w-16 h-16 bg-white/10 backdrop-blur-md rounded-[1rem] flex items-center justify-center mx-auto mb-4 shadow-2xl ring-1 ring-white/20">
-            <Coffee size={32} className="text-white" />
-          </div>
-          <h1 className="text-3xl font-black text-white mb-1 tracking-tighter">StampLink</h1>
-          <p className="text-coffee-200 font-bold opacity-80 uppercase tracking-widest text-[10px]">
-            {isRegistering ? 'New Member Enrollment' : 'Member Check-In'}
+          {brandConfig.logoUrl ? (
+            <div className="mb-4 flex justify-center">
+              <img src={brandConfig.logoUrl} alt={brandConfig.name} className="h-16 object-contain drop-shadow-2xl" />
+            </div>
+          ) : (
+            <div className="w-20 h-20 bg-white/20 backdrop-blur-xl rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-2xl ring-1 ring-white/30 transform hover:scale-110 transition-transform duration-300">
+              <Coffee size={40} className="text-white drop-shadow-lg" />
+            </div>
+          )}
+          <h1 className="text-4xl font-black text-white mb-2 tracking-tight drop-shadow-lg">{brandConfig.name}</h1>
+          <p className="text-white/90 font-bold opacity-90 uppercase tracking-widest text-xs flex items-center justify-center gap-2">
+            <Sparkles size={12} />
+            {isRegistering ? 'New Member Enrollment' : brandConfig.tagline}
           </p>
         </div>
       </div>
 
-      <div className="p-8 bg-white">
+      <div className="p-8 bg-gradient-to-b from-white to-gray-50">
         <form onSubmit={handleSubmit} className="space-y-5">
           {error && (
-            <div className="p-4 bg-red-50 text-red-600 text-xs font-bold rounded-xl border border-red-100 flex items-center justify-center gap-2">
-               <AlertCircle size={14} className="shrink-0" /> <span className="text-left">{error}</span>
+            <div className="p-4 bg-red-50 text-red-600 text-sm font-bold rounded-xl border-2 border-red-100 flex items-center gap-3 animate-in slide-in-from-top-2">
+              <AlertCircle size={18} className="shrink-0" />
+              <span>{error}</span>
             </div>
           )}
 
-          <InputField 
-            label="Username"
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="e.g. coffeefan99"
-            icon={UserIcon}
-            required
-          />
+          {!isRegistering ? (
+            // Login Form
+            <>
+              {/* Phone Number with Country Code Input */}
+              <div className="space-y-1.5">
+                <label className="block text-sm font-bold text-gray-900 tracking-tight">
+                  Phone Number <span className="text-red-500">*</span>
+                </label>
+                <div className="flex gap-2">
+                  <div className="relative group w-28">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 group-focus-within:text-brand-500 transition-colors">
+                      <Globe size={18} />
+                    </div>
+                    <input
+                      type="text"
+                      value={countryCode}
+                      onChange={(e) => {
+                        let value = e.target.value;
+                        value = value.replace(/\D/g, '');
+                        setCountryCode(value);
+                      }}
+                      placeholder="62"
+                      className="w-full pl-10 pr-2 py-3.5 rounded-xl border-2 border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-100 outline-none transition-all font-bold text-center hover:border-gray-300"
+                    />
+                  </div>
 
-          <InputField 
-            label="Password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
-            icon={Lock}
-            required
-          />
+                  <div className="relative flex-1 group">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 group-focus-within:text-brand-500 transition-colors">
+                      <Phone size={18} />
+                    </div>
+                    <input
+                      type="tel"
+                      value={phone}
+                      onChange={handlePhoneChange}
+                      required
+                      placeholder="8123456789"
+                      className="w-full pl-10 pr-4 py-3.5 rounded-xl border-2 border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-100 outline-none transition-all font-medium hover:border-gray-300"
+                    />
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500 mt-1.5 flex items-center gap-1">
+                  <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
+                  Enter country code and phone number separately
+                </p>
+              </div>
 
-          {isRegistering && (
-            <div className="space-y-5 animate-in slide-in-from-top-4 fade-in pt-2">
-              <div className="h-px bg-gray-100"></div>
-              <p className="text-xs font-black uppercase text-gray-400 tracking-wider">Personal Details</p>
-              
-              <InputField 
+              {/* Birth Date Input */}
+              <div className="space-y-1.5">
+                <label className="block text-sm font-bold text-gray-900 tracking-tight">
+                  Birth Date <span className="text-red-500">*</span>
+                </label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 group-focus-within:text-brand-500 transition-colors">
+                    <Calendar size={18} />
+                  </div>
+                  <input
+                    type="text"
+                    value={birthDate}
+                    onChange={handleBirthDateChange}
+                    required
+                    placeholder="DD/MM/YYYY"
+                    maxLength={10}
+                    className="w-full pl-10 pr-4 py-3.5 rounded-xl border-2 border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-100 outline-none transition-all font-medium hover:border-gray-300"
+                  />
+                </div>
+                <p className="text-xs text-gray-500 mt-1.5 flex items-center gap-1">
+                  <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
+                  Example: 20/12/2003
+                </p>
+              </div>
+            </>
+          ) : (
+            // Registration Form
+            <div className="space-y-5 animate-in slide-in-from-right-4 fade-in duration-500">
+              <InputField
                 label="Full Name"
                 type="text"
                 value={name}
@@ -139,7 +249,7 @@ export const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
                 icon={UserIcon}
                 required
               />
-              <InputField 
+              <InputField
                 label="Email"
                 type="email"
                 value={email}
@@ -148,16 +258,50 @@ export const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
                 icon={Mail}
                 required
               />
-              <InputField 
-                label="Mobile Phone"
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="+1 234 567 890"
-                icon={Phone}
-                required
-              />
-               <InputField 
+
+              {/* Phone Number with Country Code Input */}
+              <div className="space-y-1.5">
+                <label className="block text-sm font-bold text-gray-900 tracking-tight">
+                  Mobile Phone <span className="text-red-500">*</span>
+                </label>
+                <div className="flex gap-2">
+                  <div className="relative group w-28">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 group-focus-within:text-brand-500 transition-colors">
+                      <Globe size={18} />
+                    </div>
+                    <input
+                      type="text"
+                      value={countryCode}
+                      onChange={(e) => {
+                        let value = e.target.value;
+                        value = value.replace(/\D/g, '');
+                        setCountryCode(value);
+                      }}
+                      placeholder="62"
+                      className="w-full pl-10 pr-2 py-3.5 rounded-xl border-2 border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-100 outline-none transition-all font-bold text-center hover:border-gray-300"
+                    />
+                  </div>
+                  <div className="relative flex-1 group">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 group-focus-within:text-brand-500 transition-colors">
+                      <Phone size={18} />
+                    </div>
+                    <input
+                      type="tel"
+                      value={phone}
+                      onChange={handlePhoneChange}
+                      required
+                      placeholder="8123456789"
+                      className="w-full pl-10 pr-4 py-3.5 rounded-xl border-2 border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-100 outline-none transition-all font-medium hover:border-gray-300"
+                    />
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500 mt-1.5 flex items-center gap-1">
+                  <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
+                  Enter digits only, no leading 0
+                </p>
+              </div>
+
+              <InputField
                 label="Home Address"
                 type="text"
                 value={address}
@@ -165,36 +309,67 @@ export const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
                 placeholder="123 Coffee Lane"
                 icon={MapPin}
               />
-               <InputField 
-                label="Birth Date"
-                type="date"
-                value={birthDate}
-                onChange={(e) => setBirthDate(e.target.value)}
-                placeholder=""
-                icon={Calendar}
-              />
+
+              {/* Birth Date Input */}
+              <div className="space-y-1.5">
+                <label className="block text-sm font-bold text-gray-900 tracking-tight">
+                  Birth Date
+                </label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 group-focus-within:text-brand-500 transition-colors">
+                    <Calendar size={18} />
+                  </div>
+                  <input
+                    type="text"
+                    value={birthDate}
+                    onChange={handleBirthDateChange}
+                    placeholder="DD/MM/YYYY"
+                    maxLength={10}
+                    className="w-full pl-10 pr-4 py-3.5 rounded-xl border-2 border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-100 outline-none transition-all font-medium hover:border-gray-300"
+                  />
+                </div>
+                <p className="text-xs text-gray-500 mt-1.5 flex items-center gap-1">
+                  <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
+                  Example: 12/05/1998
+                </p>
+              </div>
             </div>
           )}
 
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-coffee-900 hover:bg-black text-white font-black text-lg py-5 px-6 rounded-2xl shadow-xl shadow-coffee-900/20 flex items-center justify-center gap-2 transition-all active:scale-95 mt-6 disabled:opacity-50"
+            className="w-full bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-700 hover:to-brand-600 text-white font-black text-lg py-4 px-6 rounded-xl shadow-xl shadow-brand-500/30 flex items-center justify-center gap-3 transition-all active:scale-[0.98] mt-6 disabled:opacity-50 disabled:cursor-not-allowed group relative overflow-hidden"
           >
-            {isLoading ? <Loader2 className="animate-spin" size={24} /> : (
+            <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+            {isLoading ? (
+              <Loader2 className="animate-spin" size={24} />
+            ) : (
               <>
-                {isRegistering ? 'Create Profile' : 'Sign In'}
-                <ArrowRight size={22} />
+                <span className="relative">{isRegistering ? 'Create Profile' : 'Sign In'}</span>
+                <ArrowRight size={22} className="relative group-hover:translate-x-1 transition-transform" />
               </>
             )}
           </button>
         </form>
 
-        <div className="mt-8 pt-6 border-t border-gray-100">
+        <div className="mt-8 pt-6 border-t border-gray-200">
           <button
-            onClick={() => { setIsRegistering(!isRegistering); setError(''); }}
-            className="text-xs font-black text-brand-600 hover:text-brand-800 flex items-center justify-center gap-1 mx-auto py-2 px-4 rounded-lg uppercase tracking-widest"
+            onClick={() => {
+              setIsRegistering(!isRegistering);
+              setError('');
+              setPhone('');
+              setCountryCode('62');
+              setBirthDate('');
+              setName('');
+              setEmail('');
+              setAddress('');
+            }}
+            className="text-sm font-black text-brand-600 hover:text-brand-700 flex items-center justify-center gap-2 mx-auto py-2 px-6 rounded-xl hover:bg-brand-50 transition-all uppercase tracking-wider group"
           >
+            <span className="group-hover:scale-110 transition-transform inline-block">
+              {isRegistering ? '←' : '→'}
+            </span>
             {isRegistering ? 'Have an account? Login' : 'New here? Register now'}
           </button>
         </div>
