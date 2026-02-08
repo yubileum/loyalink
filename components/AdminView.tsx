@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { QrCode, LogOut, Check, AlertCircle, User as UserIcon, X, Download, Wifi, RefreshCw, Users, WifiOff, Cloud, Plus, Minus, Palette, Sparkles, TrendingUp } from 'lucide-react';
+import { QrCode, LogOut, Check, AlertCircle, User as UserIcon, X, Download, Wifi, RefreshCw, Users, WifiOff, Cloud, Plus, Minus, Palette, Sparkles, TrendingUp, Phone, Globe, Edit3, Award } from 'lucide-react';
 import { Scanner } from './Scanner';
 import { BrandSettings } from './BrandSettings';
-import { logAdminTransaction, generateTransactionCSV, generateMembersCSV, applyStampToUser, fetchUserById } from '../services/storage';
+import { StampConfigModal } from './StampConfigModal';
+import { logAdminTransaction, generateTransactionCSV, generateMembersCSV, applyStampToUser, fetchUserById, fetchUserByPhone } from '../services/storage';
 import { sendStampSignal, sendScanSignal, fetchRemoteUser } from '../services/connection';
 import { User } from '../types';
 import { getBrandConfig } from '../services/branding';
@@ -14,6 +15,8 @@ interface AdminViewProps {
 export const AdminView: React.FC<AdminViewProps> = ({ onLogout }) => {
     const [isScanning, setIsScanning] = useState(false);
     const [showBrandSettings, setShowBrandSettings] = useState(false);
+    const [showManualInput, setShowManualInput] = useState(false);
+    const [showStampConfig, setShowStampConfig] = useState(false);
     const [status, setStatus] = useState<'idle' | 'success' | 'error' | 'syncing'>('idle');
     const [message, setMessage] = useState('');
 
@@ -21,6 +24,10 @@ export const AdminView: React.FC<AdminViewProps> = ({ onLogout }) => {
     const [pendingPeerId, setPendingPeerId] = useState<string | null>(null);
     const [stampCount, setStampCount] = useState(1);
     const brandConfig = getBrandConfig();
+
+    // Manual input fields
+    const [countryCode, setCountryCode] = useState('62');
+    const [phone, setPhone] = useState('');
 
     const handleScan = async (data: string) => {
         setIsScanning(false);
@@ -159,13 +166,70 @@ export const AdminView: React.FC<AdminViewProps> = ({ onLogout }) => {
         }
     };
 
+    // Handle phone number input - only allow digits, no leading 0
+    const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        let value = e.target.value;
+        value = value.replace(/\D/g, '');
+        value = value.replace(/^0+/, '');
+        const maxLength = 12;
+        if (value.length > maxLength) {
+            value = value.substring(0, maxLength);
+        }
+        setPhone(value);
+    };
+
+    // Handle manual phone number lookup
+    const handleManualLookup = async () => {
+        if (!phone) {
+            setStatus('error');
+            setMessage('Please enter a phone number.');
+            setTimeout(() => setStatus('idle'), 3000);
+            return;
+        }
+
+        if (phone.length < 8) {
+            setStatus('error');
+            setMessage('Please enter a valid phone number.');
+            setTimeout(() => setStatus('idle'), 3000);
+            return;
+        }
+
+        setStatus('syncing');
+        setMessage('Looking up member...');
+
+        try {
+            const fullPhone = countryCode + phone;
+
+            const user = await fetchUserByPhone(fullPhone);
+
+            if (user) {
+                setPendingUser(user);
+                setPendingPeerId(null); // No peer connection for manual input
+                setStampCount(1);
+                setStatus('idle');
+                setShowManualInput(false);
+                // Clear the form
+                setPhone('');
+                setCountryCode('62');
+            } else {
+                setStatus('error');
+                setMessage('Member not found. Please check phone number.');
+                setTimeout(() => setStatus('idle'), 4000);
+            }
+        } catch (err: any) {
+            setStatus('error');
+            setMessage(err.message || 'Member not found. Please check phone number.');
+            setTimeout(() => setStatus('idle'), 4000);
+        }
+    };
+
     const downloadReport = () => {
         const csv = generateTransactionCSV();
         const blob = new Blob([csv], { type: 'text/csv' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `stamplink_report_${new Date().toISOString().split('T')[0]}.csv`;
+        a.download = `dice_report_${new Date().toISOString().split('T')[0]}.csv`;
         a.click();
     };
 
@@ -177,7 +241,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ onLogout }) => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `stamplink_members_${new Date().toISOString().split('T')[0]}.csv`;
+        a.download = `dice_members_${new Date().toISOString().split('T')[0]}.csv`;
         a.click();
         setStatus('idle');
     };
@@ -202,6 +266,13 @@ export const AdminView: React.FC<AdminViewProps> = ({ onLogout }) => {
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => setShowStampConfig(true)}
+                            className="p-2.5 text-gray-400 hover:text-white hover:bg-white/10 rounded-xl transition-all"
+                            title="Stamp Configuration"
+                        >
+                            <Award size={18} />
+                        </button>
                         <button
                             onClick={() => setShowBrandSettings(true)}
                             className="p-2.5 text-gray-400 hover:text-white hover:bg-white/10 rounded-xl transition-all"
@@ -268,6 +339,16 @@ export const AdminView: React.FC<AdminViewProps> = ({ onLogout }) => {
                             <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
                             <QrCode size={24} className="relative" />
                             <span className="relative">Scan Member Code</span>
+                        </button>
+
+                        {/* Manual Input Button */}
+                        <button
+                            onClick={() => setShowManualInput(true)}
+                            className="w-full bg-gradient-to-r from-gray-700 to-gray-600 hover:from-gray-800 hover:to-gray-700 active:scale-[0.98] transition-all text-white font-black py-5 rounded-2xl shadow-xl shadow-gray-500/20 flex items-center justify-center gap-3 text-lg group relative overflow-hidden mt-3"
+                        >
+                            <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+                            <Edit3 size={24} className="relative" />
+                            <span className="relative">Manual Phone Input</span>
                         </button>
 
                         {/* Secondary Actions */}
@@ -382,8 +463,106 @@ export const AdminView: React.FC<AdminViewProps> = ({ onLogout }) => {
                 </div>
             )}
 
+            {/* Manual Input Modal */}
+            {showManualInput && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+                    <div className="absolute inset-0" onClick={() => !status.includes('syncing') && setShowManualInput(false)}></div>
+                    <div className="bg-gradient-to-br from-gray-800 to-gray-900 w-full max-w-md rounded-3xl p-8 relative z-10 shadow-2xl border border-gray-700 animate-in zoom-in-95">
+                        <button
+                            onClick={() => setShowManualInput(false)}
+                            disabled={status === 'syncing'}
+                            className="absolute top-6 right-6 text-gray-500 hover:text-white disabled:opacity-30 transition-colors"
+                        >
+                            <X size={24} />
+                        </button>
+
+                        <div className="flex flex-col items-center text-center gap-6">
+                            {/* Icon */}
+                            <div className="w-20 h-20 bg-gradient-to-br from-gray-700 to-gray-600 rounded-2xl flex items-center justify-center text-white shadow-xl">
+                                <Edit3 size={40} />
+                            </div>
+
+                            {/* Title */}
+                            <div>
+                                <h3 className="text-2xl font-black text-white leading-none mb-2">Manual Phone Input</h3>
+                                <p className="text-gray-400 text-sm font-medium">Enter member's phone number to lookup</p>
+                            </div>
+
+                            {/* Form */}
+                            <div className="w-full space-y-4">
+                                {/* Phone Number with Country Code Input */}
+                                <div className="space-y-1.5 text-left">
+                                    <label className="block text-sm font-bold text-white tracking-tight">
+                                        Phone Number <span className="text-red-400">*</span>
+                                    </label>
+                                    <div className="flex gap-2">
+                                        <div className="relative group w-24">
+                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500 group-focus-within:text-brand-400 transition-colors">
+                                                <Globe size={18} />
+                                            </div>
+                                            <input
+                                                type="text"
+                                                value={countryCode}
+                                                onChange={(e) => {
+                                                    let value = e.target.value;
+                                                    value = value.replace(/\D/g, '');
+                                                    setCountryCode(value);
+                                                }}
+                                                placeholder="62"
+                                                className="w-full pl-10 pr-2 py-3.5 rounded-xl border-2 border-gray-600 bg-gray-700/50 text-white placeholder:text-gray-500 focus:bg-gray-700 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/20 outline-none transition-all font-bold text-center hover:border-gray-500"
+                                            />
+                                        </div>
+
+                                        <div className="relative flex-1 group">
+                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500 group-focus-within:text-brand-400 transition-colors">
+                                                <Phone size={18} />
+                                            </div>
+                                            <input
+                                                type="tel"
+                                                value={phone}
+                                                onChange={handlePhoneChange}
+                                                placeholder="8123456789"
+                                                className="w-full pl-10 pr-4 py-3.5 rounded-xl border-2 border-gray-600 bg-gray-700/50 text-white placeholder:text-gray-500 focus:bg-gray-700 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/20 outline-none transition-all font-medium hover:border-gray-500"
+                                            />
+                                        </div>
+                                    </div>
+                                    <p className="text-xs text-gray-500 mt-1.5 flex items-center gap-1">
+                                        <span className="w-1 h-1 bg-gray-500 rounded-full"></span>
+                                        Enter country code and phone number separately
+                                    </p>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex gap-3 w-full mt-2">
+                            <button
+                                onClick={() => {
+                                    setShowManualInput(false);
+                                    setPhone('');
+                                    setCountryCode('62');
+                                }}
+                                disabled={status === 'syncing'}
+                                className="flex-1 py-4 px-4 rounded-xl font-bold text-gray-400 bg-gray-700/50 hover:bg-gray-700 transition-colors disabled:opacity-50 border border-gray-600"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleManualLookup}
+                                disabled={status === 'syncing' || !phone}
+                                className="flex-1 py-4 px-4 rounded-xl font-bold text-white bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-700 hover:to-brand-600 shadow-lg shadow-brand-500/30 transition-all disabled:opacity-50 disabled:scale-100 flex items-center justify-center gap-2"
+                            >
+                                {status === 'syncing' ? <><RefreshCw className="animate-spin" size={20} /> Looking up...</> : <><Phone size={20} /> Lookup Member</>}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {isScanning && <Scanner onScan={handleScan} onClose={() => setIsScanning(false)} />}
             {showBrandSettings && <BrandSettings onClose={() => setShowBrandSettings(false)} />}
+            {showStampConfig && <StampConfigModal onClose={() => setShowStampConfig(false)} />}
         </div>
     );
 };

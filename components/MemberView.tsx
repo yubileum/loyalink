@@ -1,12 +1,13 @@
 import React, { useEffect, useState, useRef } from 'react';
 import QRCode from 'react-qr-code';
-import { User } from '../types';
-import { getSessionUser, subscribeToGlobalUpdates } from '../services/storage';
+import { User, StampConfig, StampEvent } from '../types';
+import { getSessionUser, subscribeToGlobalUpdates, getUserHistory } from '../services/storage';
 import { initializeHost } from '../services/connection';
 import { StampGrid } from './StampGrid';
-import { Sparkles, History, LogOut, RefreshCw, Wifi, WifiOff, Scan, Gift, TrendingUp, Award, Zap } from 'lucide-react';
+import { Sparkles, History, LogOut, RefreshCw, Wifi, WifiOff, Scan, Gift, TrendingUp, Award, Zap, X } from 'lucide-react';
 import { getRewardInsight } from '../services/geminiService';
 import { getBrandConfig } from '../services/branding';
+import { getStampConfig, fetchStampConfig } from '../services/stampConfig';
 
 interface MemberViewProps {
   currentUser: User;
@@ -21,8 +22,27 @@ export const MemberView: React.FC<MemberViewProps> = ({ currentUser, onLogout })
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [scanNotification, setScanNotification] = useState<boolean>(false);
   const [showQR, setShowQR] = useState<boolean>(false);
+  const [showHistory, setShowHistory] = useState<boolean>(false);
+  const [historyEvents, setHistoryEvents] = useState<StampEvent[]>(user.history || []);
+  const [loadingHistory, setLoadingHistory] = useState<boolean>(false);
+  const [isSyncing, setIsSyncing] = useState<boolean>(false);
   const peerRef = useRef<any>(null);
   const brandConfig = getBrandConfig();
+  const [stampConfig, setStampConfig] = useState<StampConfig>(getStampConfig());
+
+  // Fetch latest config from API on mount
+  useEffect(() => {
+    const loadConfig = async () => {
+      const config = await fetchStampConfig();
+      setStampConfig(config);
+    };
+    loadConfig();
+  }, []);
+
+  // Calculate next checkpoint
+  const nextCheckpoint = stampConfig.checkpoints
+    .filter(cp => cp.stampCount > user.stamps)
+    .sort((a, b) => a.stampCount - b.stampCount)[0];
 
   const latestUserRef = useRef<User>(user);
   useEffect(() => { latestUserRef.current = user; }, [user]);
@@ -34,16 +54,25 @@ export const MemberView: React.FC<MemberViewProps> = ({ currentUser, onLogout })
   }, []);
 
   useEffect(() => {
-    const fetchLatest = async () => {
-      const updated = await getSessionUser();
-      if (updated) {
-        if (updated.stamps !== latestUserRef.current.stamps) {
-          setUser(updated);
+    const fetchLatest = async (isManual = false) => {
+      if (isManual) setIsSyncing(true);
+      try {
+        const updated = await getSessionUser(isManual);
+        if (updated) {
+          if (JSON.stringify(updated) !== JSON.stringify(latestUserRef.current)) {
+            setUser(updated);
+          }
         }
+      } finally {
+        if (isManual) setIsSyncing(false);
       }
     };
 
-    const interval = setInterval(fetchLatest, 10000);
+    // Initial silent sync
+    fetchLatest();
+
+    // Polling every 5 seconds instead of 10
+    const interval = setInterval(() => fetchLatest(false), 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -80,9 +109,9 @@ export const MemberView: React.FC<MemberViewProps> = ({ currentUser, onLogout })
             });
 
             setTimeout(async () => {
-              const updated = await getSessionUser();
+              const updated = await getSessionUser(true); // Force fetch after P2P stamp
               if (updated) setUser(updated);
-            }, 1000);
+            }, 1000); // Wait a bit for backend to process;
 
             return true;
           }
@@ -113,6 +142,17 @@ export const MemberView: React.FC<MemberViewProps> = ({ currentUser, onLogout })
       if (peerRef.current) peerRef.current.destroy();
     };
   }, []);
+
+  const handleOpenHistory = async () => {
+    setShowHistory(true);
+    setLoadingHistory(true);
+    try {
+      const history = await getUserHistory(user.id);
+      setHistoryEvents(history);
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
 
   const handleAskAi = async () => {
     setLoadingAi(true);
@@ -151,16 +191,37 @@ export const MemberView: React.FC<MemberViewProps> = ({ currentUser, onLogout })
               </div>
             )}
             <div>
-              <h1 className="font-black text-xl tracking-tight text-gray-900">{brandConfig.name}</h1>
-              <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">{brandConfig.tagline}</p>
+              <h1 className="font-black text-lg sm:text-xl tracking-tight text-gray-900">{brandConfig.name}</h1>
+              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">{brandConfig.tagline}</p>
             </div>
           </div>
-          <button
-            onClick={onLogout}
-            className="px-4 py-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-xl flex items-center gap-2 text-sm font-bold transition-all"
-          >
-            <LogOut size={16} /> Logout
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                const fetchLatest = async () => {
+                  setIsSyncing(true);
+                  try {
+                    const updated = await getSessionUser(true);
+                    if (updated) setUser(updated);
+                  } finally {
+                    setIsSyncing(false);
+                  }
+                };
+                fetchLatest();
+              }}
+              disabled={isSyncing}
+              className="p-2 text-gray-400 hover:text-brand-600 hover:bg-brand-50 rounded-xl transition-all"
+              title="Sync Data"
+            >
+              <RefreshCw size={18} className={isSyncing ? "animate-spin text-brand-500" : ""} />
+            </button>
+            <button
+              onClick={onLogout}
+              className="px-4 py-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-xl flex items-center gap-2 text-sm font-bold transition-all"
+            >
+              <LogOut size={16} /> Logout
+            </button>
+          </div>
         </div>
       </header>
 
@@ -179,7 +240,7 @@ export const MemberView: React.FC<MemberViewProps> = ({ currentUser, onLogout })
           {/* Animated background pattern */}
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMTZjMC0yLjIxIDEuNzktNCA0LTRzNCAxLjc5IDQgNC0xLjc5IDQtNCA0LTQtMS43OS00LTR6bTAgMjRjMC0yLjIxIDEuNzktNCA0LTRzNCAxLjc5IDQgNC0xLjc5IDQtNCA0LTQtMS43OS00LTR6TTEyIDE2YzAtMi4yMSAxLjc5LTQgNC00czQgMS43OSA0IDQtMS43OSA0LTQgNC00LTEuNzktNC00em0wIDI0YzAtMi4yMSAxLjc5LTQgNC00czQgMS43OSA0IDQtMS43OSA0LTQgNC00LTEuNzktNC00eiIvPjwvZz48L2c+PC9zdmc+')] opacity-30"></div>
 
-          <div className="relative p-8">
+          <div className="relative p-6 sm:p-8">
             {/* Connection Status Badge */}
             <div className="absolute top-6 right-6">
               {isConnected ? (
@@ -209,7 +270,7 @@ export const MemberView: React.FC<MemberViewProps> = ({ currentUser, onLogout })
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <p className="text-white/80 text-sm font-bold mb-1">Your Progress</p>
-                  <p className="text-4xl font-black text-white">{user.stamps}<span className="text-2xl text-white/60">/{user.maxStamps}</span></p>
+                  <p className="text-3xl sm:text-4xl font-black text-white">{user.stamps}<span className="text-xl sm:text-2xl text-white/60">/{user.maxStamps}</span></p>
                 </div>
                 <div className="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center border-2 border-white/30">
                   <Award size={40} className="text-white drop-shadow-lg" />
@@ -227,9 +288,12 @@ export const MemberView: React.FC<MemberViewProps> = ({ currentUser, onLogout })
               </div>
 
               {stampsRemaining > 0 ? (
-                <p className="text-white/90 text-sm font-bold mt-3 flex items-center gap-2">
+                <p className="text-white text-base sm:text-lg font-black mt-2 sm:mt-3 leading-tight">
                   <TrendingUp size={16} />
-                  {stampsRemaining} more stamp{stampsRemaining !== 1 ? 's' : ''} to your reward!
+                  {nextCheckpoint
+                    ? `${nextCheckpoint.stampCount - user.stamps} more stamp${nextCheckpoint.stampCount - user.stamps !== 1 ? 's' : ''} to get ${nextCheckpoint.reward}!`
+                    : `${stampsRemaining} more stamp${stampsRemaining !== 1 ? 's' : ''} to your reward!`
+                  }
                 </p>
               ) : (
                 <p className="text-white text-sm font-bold mt-3 flex items-center gap-2">
@@ -272,80 +336,111 @@ export const MemberView: React.FC<MemberViewProps> = ({ currentUser, onLogout })
         {/* Stamps Grid */}
         <StampGrid user={user} />
 
-        {/* AI Assistant Card */}
-        <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-3xl p-6 border-2 border-purple-100 shadow-lg relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-4 opacity-10">
-            <Sparkles size={120} className="text-purple-500" />
-          </div>
-          <div className="relative z-10 flex items-start gap-4">
-            <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl text-white shadow-lg shrink-0">
-              <Sparkles size={24} />
+        {/* Activity History Button (Static Card Style) */}
+        <div className="mt-2 text-center">
+          <button
+            onClick={handleOpenHistory}
+            className="w-full bg-white rounded-3xl p-5 sm:p-6 border border-gray-200 shadow-lg hover:shadow-xl hover:border-brand-200 transition-all group flex items-center justify-between"
+          >
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-50 rounded-2xl flex items-center justify-center group-hover:bg-brand-50 transition-colors">
+                <History size={20} sm:size={24} className="text-gray-400 group-hover:text-brand-600 transition-colors" />
+              </div>
+              <div className="text-left">
+                <p className="font-black text-gray-900 text-sm sm:text-base">Recent Activity</p>
+                <p className="text-[10px] sm:text-xs text-gray-500 font-bold uppercase tracking-widest leading-none mt-1">View your stamp history</p>
+              </div>
             </div>
-            <div className="flex-1">
-              <h3 className="font-black text-gray-900 mb-2 text-lg">AI Loyalty Assistant</h3>
-              <p className="text-gray-700 font-medium mb-3">
-                {aiInsight || "Get personalized insights about your rewards and progress!"}
-              </p>
-              {!aiInsight && (
-                <button
-                  onClick={handleAskAi}
-                  disabled={loadingAi}
-                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold px-5 py-2.5 rounded-xl flex items-center gap-2 shadow-lg shadow-purple-500/30 transition-all disabled:opacity-50"
-                >
-                  {loadingAi ? (
-                    <>
-                      <RefreshCw className="animate-spin" size={16} />
-                      Thinking...
-                    </>
-                  ) : (
-                    <>
-                      <Zap size={16} />
-                      Get Insights
-                    </>
-                  )}
-                </button>
-              )}
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gray-50 flex items-center justify-center group-hover:bg-brand-50 transition-colors">
+              <Zap size={16} sm:size={18} className="text-gray-300 group-hover:text-brand-500" />
             </div>
-          </div>
+          </button>
         </div>
 
-        {/* Activity History */}
-        <div className="space-y-4">
-          <h3 className="font-black text-gray-900 flex items-center gap-2 text-lg">
-            <History size={20} className="text-brand-500" />
-            Recent Activity
-          </h3>
-          <div className="bg-white rounded-3xl border border-gray-200 divide-y divide-gray-100 shadow-lg overflow-hidden">
-            {user.history.length > 0 ? user.history.slice(0, 5).map(evt => (
-              <div key={evt.id} className="p-5 flex justify-between items-center hover:bg-gray-50 transition-colors">
+        {/* History Modal */}
+        {showHistory && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
+            <div className="bg-white rounded-[2.5rem] w-full max-w-lg shadow-2xl overflow-hidden animate-in zoom-in-95">
+              <div className="p-8 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
                 <div className="flex items-center gap-4">
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${evt.type === 'add' ? 'bg-green-100' : 'bg-orange-100'}`}>
-                    {evt.type === 'add' ? (
-                      <TrendingUp size={20} className="text-green-600" />
-                    ) : (
-                      <Gift size={20} className="text-orange-600" />
-                    )}
+                  <div className="w-12 h-12 bg-white rounded-2xl shadow-sm border border-gray-100 flex items-center justify-center">
+                    <History size={24} className="text-brand-600" />
                   </div>
                   <div>
-                    <p className="font-bold text-gray-900">{evt.type === 'add' ? 'Stamp Collected' : 'Reward Redeemed'}</p>
-                    <p className="text-sm text-gray-500 font-medium">{new Date(evt.timestamp).toLocaleString()}</p>
+                    <h3 className="text-xl font-black text-gray-900 tracking-tight">Recent Activity</h3>
+                    <p className="text-xs text-gray-500 font-bold uppercase tracking-widest">Your stamp journey</p>
                   </div>
                 </div>
-                <span className={`text-lg font-black px-4 py-2 rounded-xl ${evt.type === 'add' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
-                  {evt.type === 'add' ? `+${evt.amount || 1}` : 'USED'}
-                </span>
+                <button
+                  onClick={() => setShowHistory(false)}
+                  className="p-3 bg-white text-gray-400 hover:text-gray-600 rounded-2xl border border-gray-100 shadow-sm transition-all active:scale-90"
+                >
+                  <X size={20} />
+                </button>
               </div>
-            )) : (
-              <div className="p-12 text-center">
-                <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <History size={32} className="text-gray-400" />
+
+              <div className="p-4 max-h-[60vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200">
+                <div className="space-y-3">
+                  {loadingHistory ? (
+                    <div className="py-20 text-center space-y-4">
+                      <div className="w-12 h-12 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin mx-auto"></div>
+                      <p className="text-gray-500 font-bold animate-pulse">Fetching your history...</p>
+                    </div>
+                  ) : historyEvents.length > 0 ? (
+                    historyEvents.slice().reverse().map(evt => (
+                      <div key={evt.id} className="p-4 rounded-3xl bg-gray-50/50 border border-gray-100 flex justify-between items-center group hover:bg-white hover:shadow-md transition-all">
+                        <div className="flex items-center gap-4">
+                          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110 ${evt.type === 'add' ? 'bg-green-100' : 'bg-orange-100'}`}>
+                            {evt.type === 'add' ? (
+                              <TrendingUp size={20} className="text-green-600" />
+                            ) : (
+                              <Gift size={20} className="text-orange-600" />
+                            )}
+                          </div>
+                          <div>
+                            <p className="font-black text-gray-900 text-sm">
+                              {evt.type === 'add' ? 'Stamp Collected' : 'Reward Redeemed'}
+                            </p>
+                            <p className="text-[10px] text-gray-500 font-bold">
+                              {new Date(evt.timestamp).toLocaleString(undefined, {
+                                day: 'numeric',
+                                month: 'short',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </p>
+                          </div>
+                        </div>
+                        <span className={`text-sm font-black px-4 py-2 rounded-xl shadow-sm ${evt.type === 'add' ? 'bg-green-500 text-white' : 'bg-orange-500 text-white'}`}>
+                          {evt.type === 'add' ? `+${evt.amount || 1}` : 'USED'}
+                        </span>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="py-20 text-center space-y-4">
+                      <div className="w-20 h-20 bg-gray-50 rounded-[2rem] flex items-center justify-center mx-auto border border-gray-100">
+                        <History size={32} className="text-gray-300" />
+                      </div>
+                      <div>
+                        <p className="text-gray-900 font-black text-lg">No activity yet</p>
+                        <p className="text-gray-400 text-sm font-medium">Start collecting stamps to see your history!</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <p className="text-gray-500 font-bold">No activity yet</p>
-                <p className="text-sm text-gray-400 mt-1">Start collecting stamps to see your history!</p>
               </div>
-            )}
+
+              <div className="p-6 bg-gray-50/50 border-t border-gray-100">
+                <button
+                  onClick={() => setShowHistory(false)}
+                  className="w-full bg-gray-900 text-white font-black py-4 rounded-2xl shadow-xl hover:bg-black transition-all active:scale-[0.98]"
+                >
+                  Got it
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
       </main>
 
       <style>{`

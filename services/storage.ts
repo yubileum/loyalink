@@ -4,10 +4,10 @@ import { User, StampEvent } from '../types';
  * GOOGLE SHEETS / LOCAL STORAGE HYBRID LAYER
  */
 
-const SESSION_KEY = 'stamplink_current_session_v4';
-const ADMIN_SESSION_KEY = 'stamplink_admin_authenticated_v4';
-const ADMIN_LOGS_KEY = 'stamplink_admin_history_v4';
-const SYNC_CHANNEL = new BroadcastChannel('stamplink_global_sync');
+const SESSION_KEY = 'dice_current_session_v4';
+const ADMIN_SESSION_KEY = 'dice_admin_authenticated_v4';
+const ADMIN_LOGS_KEY = 'dice_admin_history_v4';
+const SYNC_CHANNEL = new BroadcastChannel('dice_global_sync');
 
 // --- STATIC CONFIGURATION ---
 const STATIC_API_URL = 'https://script.google.com/macros/s/AKfycbwJUABZ9PsGEv91FjlB33kOAsYsMm6oz77isOwtvw2JQQNSpvtwkBdby2EzyZgB7qcmVg/exec';
@@ -67,14 +67,44 @@ export const checkAdminSession = (): boolean => {
   return localStorage.getItem(ADMIN_SESSION_KEY) === 'true';
 };
 
-export const getSessionUser = async (): Promise<User | null> => {
+export const getSessionUser = async (forceFetch: boolean = false): Promise<User | null> => {
   const sessionJson = localStorage.getItem(SESSION_KEY);
   if (!sessionJson) return null;
-  const { phone, id } = JSON.parse(sessionJson);
 
+  const sessionData = JSON.parse(sessionJson);
+  const { id } = sessionData;
+
+  // Determine if we need a fresh fetch instead of relying solely on cache
+  const needsFreshFetch = !sessionData.user ||
+    !sessionData.user.history ||
+    sessionData.version !== 'v1.1';
+
+  // If we have cached user data and it's reasonably complete, return it immediately
+  // while we optionally fetch the latest from the server in the background
+  if (sessionData.user && !forceFetch && !needsFreshFetch) {
+    // Refetch in background to update cache quietly
+    callApi('getUser', { id }).then(res => {
+      if (res?.success) {
+        const oldStamps = sessionData.user.stamps;
+        const newStamps = res.user.stamps;
+        const hasChanges = oldStamps !== newStamps ||
+          JSON.stringify(res.user.history) !== JSON.stringify(sessionData.user.history);
+
+        if (hasChanges) {
+          localStorage.setItem(SESSION_KEY, JSON.stringify({ ...sessionData, user: res.user, version: 'v1.1' }));
+          SYNC_CHANNEL.postMessage({ type: 'DB_UPDATE' });
+        }
+      }
+    });
+    return sessionData.user;
+  }
 
   const res = await callApi('getUser', { id });
-  return res?.success ? res.user : null;
+  if (res?.success) {
+    localStorage.setItem(SESSION_KEY, JSON.stringify({ ...sessionData, user: res.user, version: 'v1.1' }));
+    return res.user;
+  }
+  return sessionData.user || null;
 };
 
 // Normalize phone number to handle various formats (for matching/login)
@@ -84,9 +114,12 @@ export const getSessionUser = async (): Promise<User | null> => {
 // - "+62 877-8323-5189" -> "6287783235189"
 // - "62877 8323 5189" -> "6287783235189"
 // - "6287783235189" -> "6287783235189"
-const normalizePhone = (phone: string): string => {
+const normalizePhone = (phone: string | number): string => {
+  // Convert to string if it's a number
+  const phoneStr = String(phone || '');
+
   // Remove all non-digit characters
-  let normalized = phone.replace(/\D/g, '');
+  let normalized = phoneStr.replace(/\D/g, '');
 
   // Convert 0-prefix to 62
   if (normalized.startsWith('0')) {
@@ -107,9 +140,12 @@ const normalizePhone = (phone: string): string => {
 // - "62 877 8323 5189" -> "6287783235189"
 // - "+62 877-8323-5189" -> "6287783235189"
 // - "6287783235189" -> "6287783235189" (already clean)
-const standardizePhone = (phone: string): string => {
+const standardizePhone = (phone: string | number): string => {
+  // Convert to string if it's a number
+  const phoneStr = String(phone || '');
+
   // Remove all non-digit characters (including +)
-  let cleaned = phone.replace(/\D/g, '');
+  let cleaned = phoneStr.replace(/\D/g, '');
 
   // If starts with 0, convert to 62
   if (cleaned.startsWith('0')) {
@@ -154,7 +190,12 @@ export const loginUser = async (phone: string, birthDate: string): Promise<User>
   console.log('API Response:', res);
 
   if (res?.success) {
-    localStorage.setItem(SESSION_KEY, JSON.stringify({ phone: res.user.phone, id: res.user.id }));
+    localStorage.setItem(SESSION_KEY, JSON.stringify({
+      phone: res.user.phone,
+      id: res.user.id,
+      user: res.user,
+      version: 'v1.1'
+    }));
     return res.user;
   } else {
     throw new Error(res?.error || 'Login failed. Please check your phone number and birth date.');
@@ -179,13 +220,23 @@ export const registerUser = async (details: {
   const res = await callApi('register', {}, payload);
 
   if (res?.success) {
-    localStorage.setItem(SESSION_KEY, JSON.stringify({ phone: res.user.phone, id: res.user.id }));
+    localStorage.setItem(SESSION_KEY, JSON.stringify({
+      phone: res.user.phone,
+      id: res.user.id,
+      user: res.user,
+      version: 'v1.1'
+    }));
     return res.user;
   } else {
     throw new Error(res?.error || 'Registration failed');
   }
 };
 
+
+export const getUserHistory = async (userId: string): Promise<StampEvent[]> => {
+  const res = await callApi('getHistory', { userId });
+  return res?.success ? res.history : [];
+};
 
 // --- STAMP OPERATIONS ---
 
@@ -210,6 +261,25 @@ export const applyStampToUser = async (userId: string, count: number = 1): Promi
 export const fetchUserById = async (userId: string): Promise<User | null> => {
   const res = await callApi('getUser', { id: userId });
   return res?.success ? res.user : null;
+};
+
+export const fetchUserByPhone = async (phone: string): Promise<User | null> => {
+  const normalizedPhone = normalizePhone(phone);
+
+  // Fetch all users and search for matching phone number
+  const res = await callApi('getAll');
+
+  if (res?.users && Array.isArray(res.users)) {
+    // Search for user with matching phone number
+    const user = res.users.find((u: User) => {
+      const userPhone = normalizePhone(u.phone || '');
+      return userPhone === normalizedPhone;
+    });
+
+    return user || null;
+  }
+
+  return null;
 };
 
 // --- ADMIN SERVICES ---

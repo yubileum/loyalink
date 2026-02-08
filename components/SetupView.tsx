@@ -30,116 +30,116 @@ export const SetupView: React.FC<SetupViewProps> = ({ onComplete, onLogout }) =>
   return (
     <div className="min-h-screen bg-gray-900 text-white p-6 flex items-center justify-center font-sans">
       <div className="max-w-2xl w-full bg-gray-800 rounded-3xl border border-gray-700 shadow-2xl overflow-hidden flex flex-col">
-        
+
         {/* Header */}
         <div className="bg-brand-600 p-8 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-white/10 rounded-xl backdrop-blur-md">
-                <Database size={32} className="text-white" />
+              <Database size={32} className="text-white" />
             </div>
             <div>
-                <h1 className="text-2xl font-black tracking-tight">System Setup</h1>
-                <p className="text-brand-100 font-medium">Connect to StampLink database.</p>
+              <h1 className="text-2xl font-black tracking-tight">System Setup</h1>
+              <p className="text-brand-100 font-medium">Connect to Dice database.</p>
             </div>
           </div>
-          
+
           {onLogout && (
-            <button 
-                onClick={onLogout}
-                className="p-2 bg-brand-700 hover:bg-brand-800 rounded-lg text-brand-100 transition-colors"
-                title="Logout"
+            <button
+              onClick={onLogout}
+              className="p-2 bg-brand-700 hover:bg-brand-800 rounded-lg text-brand-100 transition-colors"
+              title="Logout"
             >
-                <LogOut size={20} />
+              <LogOut size={20} />
             </button>
           )}
         </div>
 
         {/* Tabs */}
         <div className="flex border-b border-gray-700">
-           <button 
-             onClick={() => setMode('connect')}
-             className={`flex-1 py-4 font-bold text-sm tracking-wide transition-colors ${mode === 'connect' ? 'bg-gray-800 text-brand-400 border-b-2 border-brand-500' : 'bg-gray-900/50 text-gray-500 hover:text-gray-300'}`}
-           >
-             Existing Store
-           </button>
-           <button 
-             onClick={() => setMode('create')}
-             className={`flex-1 py-4 font-bold text-sm tracking-wide transition-colors ${mode === 'create' ? 'bg-gray-800 text-brand-400 border-b-2 border-brand-500' : 'bg-gray-900/50 text-gray-500 hover:text-gray-300'}`}
-           >
-             Create New Database
-           </button>
+          <button
+            onClick={() => setMode('connect')}
+            className={`flex-1 py-4 font-bold text-sm tracking-wide transition-colors ${mode === 'connect' ? 'bg-gray-800 text-brand-400 border-b-2 border-brand-500' : 'bg-gray-900/50 text-gray-500 hover:text-gray-300'}`}
+          >
+            Existing Store
+          </button>
+          <button
+            onClick={() => setMode('create')}
+            className={`flex-1 py-4 font-bold text-sm tracking-wide transition-colors ${mode === 'create' ? 'bg-gray-800 text-brand-400 border-b-2 border-brand-500' : 'bg-gray-900/50 text-gray-500 hover:text-gray-300'}`}
+          >
+            Create New Database
+          </button>
         </div>
 
         <div className="p-8">
-          
+
           {mode === 'connect' ? (
             <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-                <div className="bg-brand-900/20 border border-brand-500/20 rounded-xl p-4 flex gap-4">
-                    <div className="p-2 bg-brand-500/20 rounded-lg h-fit text-brand-400"><Zap size={20} /></div>
-                    <div>
-                        <h3 className="font-bold text-brand-400 text-sm mb-1">Quick Connect</h3>
-                        <p className="text-xs text-gray-400 leading-relaxed">
-                            Scan a <strong>Configuration QR Code</strong> from an existing admin device to connect instantly.
-                        </p>
-                    </div>
+              <div className="bg-brand-900/20 border border-brand-500/20 rounded-xl p-4 flex gap-4">
+                <div className="p-2 bg-brand-500/20 rounded-lg h-fit text-brand-400"><Zap size={20} /></div>
+                <div>
+                  <h3 className="font-bold text-brand-400 text-sm mb-1">Quick Connect</h3>
+                  <p className="text-xs text-gray-400 leading-relaxed">
+                    Scan a <strong>Configuration QR Code</strong> from an existing admin device to connect instantly.
+                  </p>
                 </div>
+              </div>
 
-                <div className="space-y-3">
-                    <label className="text-xs font-bold uppercase text-gray-400 tracking-wider">Or Enter Link Manually</label>
-                    <div className="flex gap-2">
-                        <div className="relative flex-1">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
-                                <FileSpreadsheet size={18} />
-                            </div>
-                            <input 
-                                value={url}
-                                onChange={(e) => setUrl(e.target.value)}
-                                placeholder="https://script.google.com/..."
-                                className="w-full bg-gray-900 border border-gray-600 rounded-xl py-3 pl-10 pr-4 text-white focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none transition-all font-mono text-xs"
-                            />
-                        </div>
-                        <button 
-                            onClick={handleSave}
-                            className="bg-brand-600 hover:bg-brand-500 text-white px-6 rounded-xl font-bold flex items-center gap-2 transition-all active:scale-95 whitespace-nowrap"
-                        >
-                            Connect <ArrowRight size={18} />
-                        </button>
+              <div className="space-y-3">
+                <label className="text-xs font-bold uppercase text-gray-400 tracking-wider">Or Enter Link Manually</label>
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
+                      <FileSpreadsheet size={18} />
                     </div>
+                    <input
+                      value={url}
+                      onChange={(e) => setUrl(e.target.value)}
+                      placeholder="https://script.google.com/..."
+                      className="w-full bg-gray-900 border border-gray-600 rounded-xl py-3 pl-10 pr-4 text-white focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none transition-all font-mono text-xs"
+                    />
+                  </div>
+                  <button
+                    onClick={handleSave}
+                    className="bg-brand-600 hover:bg-brand-500 text-white px-6 rounded-xl font-bold flex items-center gap-2 transition-all active:scale-95 whitespace-nowrap"
+                  >
+                    Connect <ArrowRight size={18} />
+                  </button>
                 </div>
+              </div>
             </div>
           ) : (
-             <div className="space-y-6 animate-in fade-in slide-in-from-left-4 duration-300">
-                <div className="space-y-4">
-                    <div className="flex items-center gap-3 text-brand-400 font-bold uppercase tracking-widest text-xs">
-                    <span className="w-6 h-6 rounded-full border border-brand-500 flex items-center justify-center text-[10px]">1</span>
-                    <span>Deploy Backend</span>
-                    </div>
-                    
-                    <div className="bg-gray-900 rounded-xl p-4 border border-gray-700 text-xs text-gray-400 space-y-2 leading-relaxed">
-                    <p>1. Create a new <a href="https://sheets.new" target="_blank" className="text-brand-400 hover:underline">Google Sheet</a>.</p>
-                    <p>2. Go to <strong>Extensions &gt; Apps Script</strong>.</p>
-                    <p>3. <strong>Delete all code</strong> in <code>Code.gs</code> and paste the code below.</p>
-                    <p>4. Click <strong>Deploy &gt; New Deployment</strong>.</p>
-                    <p>5. Click the gear icon &gt; <strong>Web App</strong>.</p>
-                    <p>6. <span className="text-red-400 font-bold">IMPORTANT:</span> Set "Who has access" to <strong>Anyone</strong>.</p>
-                    <p>7. Copy the <strong>Web App URL</strong> and switch back to the "Existing Store" tab.</p>
-                    </div>
-
-                    <div className="relative group">
-                    <div className="absolute top-2 right-2">
-                        <button 
-                        onClick={copyCode}
-                        className="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-2 transition-all"
-                        >
-                        {copied ? <Check size={14} /> : <Copy size={14} />}
-                        {copied ? 'Copied' : 'Copy Code'}
-                        </button>
-                    </div>
-                    <pre className="bg-black/50 p-4 rounded-xl text-xs text-gray-300 overflow-x-auto h-48 border border-gray-700 font-mono scrollbar-thin scrollbar-thumb-gray-600">
-                        {APPS_SCRIPT_CODE}
-                    </pre>
-                    </div>
+            <div className="space-y-6 animate-in fade-in slide-in-from-left-4 duration-300">
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 text-brand-400 font-bold uppercase tracking-widest text-xs">
+                  <span className="w-6 h-6 rounded-full border border-brand-500 flex items-center justify-center text-[10px]">1</span>
+                  <span>Deploy Backend</span>
                 </div>
+
+                <div className="bg-gray-900 rounded-xl p-4 border border-gray-700 text-xs text-gray-400 space-y-2 leading-relaxed">
+                  <p>1. Create a new <a href="https://sheets.new" target="_blank" className="text-brand-400 hover:underline">Google Sheet</a>.</p>
+                  <p>2. Go to <strong>Extensions &gt; Apps Script</strong>.</p>
+                  <p>3. <strong>Delete all code</strong> in <code>Code.gs</code> and paste the code below.</p>
+                  <p>4. Click <strong>Deploy &gt; New Deployment</strong>.</p>
+                  <p>5. Click the gear icon &gt; <strong>Web App</strong>.</p>
+                  <p>6. <span className="text-red-400 font-bold">IMPORTANT:</span> Set "Who has access" to <strong>Anyone</strong>.</p>
+                  <p>7. Copy the <strong>Web App URL</strong> and switch back to the "Existing Store" tab.</p>
+                </div>
+
+                <div className="relative group">
+                  <div className="absolute top-2 right-2">
+                    <button
+                      onClick={copyCode}
+                      className="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-2 transition-all"
+                    >
+                      {copied ? <Check size={14} /> : <Copy size={14} />}
+                      {copied ? 'Copied' : 'Copy Code'}
+                    </button>
+                  </div>
+                  <pre className="bg-black/50 p-4 rounded-xl text-xs text-gray-300 overflow-x-auto h-48 border border-gray-700 font-mono scrollbar-thin scrollbar-thumb-gray-600">
+                    {APPS_SCRIPT_CODE}
+                  </pre>
+                </div>
+              </div>
             </div>
           )}
 
@@ -151,7 +151,7 @@ export const SetupView: React.FC<SetupViewProps> = ({ onComplete, onLogout }) =>
 
 const APPS_SCRIPT_CODE = `
 /**
- * STAMPLINK BACKEND - V6 (Consistency Fix)
+ * DICE BACKEND - V6 (Consistency Fix)
  * - Added SpreadsheetApp.flush() to ensure updates are instantly visible to other devices.
  * - Unified parameter parsing to support both GET and POST for all actions.
  */

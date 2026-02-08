@@ -141,8 +141,10 @@ export const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
 
         <div className="relative z-10">
           {brandConfig.logoUrl ? (
-            <div className="mb-4 flex justify-center">
-              <img src={brandConfig.logoUrl} alt={brandConfig.name} className="h-16 object-contain drop-shadow-2xl" />
+            <div className="mb-4 flex justify-center relative z-20">
+              <div className="bg-white p-3 rounded-2xl shadow-xl shadow-black/10 transform hover:scale-105 transition-transform duration-300">
+                <img src={brandConfig.logoUrl} alt={brandConfig.name} className="h-16 object-contain" />
+              </div>
             </div>
           ) : (
             <div className="w-20 h-20 bg-white/20 backdrop-blur-xl rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-2xl ring-1 ring-white/30 transform hover:scale-110 transition-transform duration-300">
@@ -302,11 +304,11 @@ export const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
               </div>
 
               <InputField
-                label="Home Address"
+                label="Domicile"
                 type="text"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
-                placeholder="123 Coffee Lane"
+                placeholder="Kelapa Gading"
                 icon={MapPin}
               />
 

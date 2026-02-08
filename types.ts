@@ -9,6 +9,7 @@ export interface User {
   birthDate?: string;
   stamps: number;
   maxStamps: number;
+  createdAt?: string; // Registration date from database
   history: StampEvent[];
 }
 
@@ -17,6 +18,16 @@ export interface StampEvent {
   timestamp: number;
   type: 'add' | 'redeem';
   amount: number;
+}
+
+export interface StampCheckpoint {
+  stampCount: number;
+  reward: string;
+}
+
+export interface StampConfig {
+  maxStamps: number;
+  checkpoints: StampCheckpoint[];
 }
 
 export enum AppRole {

@@ -8,14 +8,13 @@ export interface BrandConfig {
     logoUrl: string;
 }
 
-const BRAND_CONFIG_KEY = 'stamplink_brand_config';
+const BRAND_CONFIG_KEY = 'dice_brand_config';
 
-// Default branding - StampLink
 const DEFAULT_BRAND: BrandConfig = {
-    name: 'StampLink',
-    tagline: 'Member Check-In',
-    primaryColor: '#1B7F5A', // Green color
-    logoUrl: '' // Will use text-based logo if empty
+    name: 'Dice',
+    tagline: 'Boardgame & Kitchen',
+    primaryColor: '#006B3F',
+    logoUrl: '/dice-logo.png' // Using the provided PNG file
 };
 
 // Get current brand configuration
@@ -23,7 +22,15 @@ export const getBrandConfig = (): BrandConfig => {
     try {
         const stored = localStorage.getItem(BRAND_CONFIG_KEY);
         if (stored) {
-            return JSON.parse(stored);
+            const config = JSON.parse(stored);
+            // Force update to the new local PNG logo if the old path or data URI is present
+            if ((config.logoUrl && !config.logoUrl.startsWith('/dice-logo.png')) || config.tagline !== 'Boardgame & Kitchen') {
+                config.logoUrl = '/dice-logo.png';
+                config.tagline = 'Boardgame & Kitchen';
+                config.primaryColor = '#006B3F';
+                localStorage.setItem(BRAND_CONFIG_KEY, JSON.stringify(config));
+            }
+            return config;
         }
     } catch (e) {
         console.error('Failed to load brand config:', e);
