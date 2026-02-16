@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Coffee, ArrowRight, Mail, User as UserIcon, AlertCircle, Phone, MapPin, Calendar, Loader2, Globe, Sparkles } from 'lucide-react';
+import { Link, ArrowRight, Mail, User as UserIcon, AlertCircle, Phone, MapPin, Calendar, Loader2, Globe, Sparkles } from 'lucide-react';
 import { loginUser, registerUser } from '../services/storage';
 import { User } from '../types';
 import { getBrandConfig } from '../services/branding';
@@ -148,7 +148,7 @@ export const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
             </div>
           ) : (
             <div className="w-20 h-20 bg-white/20 backdrop-blur-xl rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-2xl ring-1 ring-white/30 transform hover:scale-110 transition-transform duration-300">
-              <Coffee size={40} className="text-white drop-shadow-lg" />
+              <Link size={40} className="text-white drop-shadow-lg" />
             </div>
           )}
           <h1 className="text-4xl font-black text-white mb-2 tracking-tight drop-shadow-lg">{brandConfig.name}</h1>

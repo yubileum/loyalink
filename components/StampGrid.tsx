@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Coffee, Gift, Sparkles, Star, Zap } from 'lucide-react';
+import { Link, Gift, Sparkles, Star, Zap } from 'lucide-react';
 import { User, StampConfig } from '../types';
 import { getBrandConfig } from '../services/branding';
 import { getStampConfig, fetchStampConfig, isCheckpoint, getCheckpointReward } from '../services/stampConfig';
@@ -117,12 +117,8 @@ export const StampGrid: React.FC<StampGridProps> = ({ user }) => {
                       {!isNew && <Sparkles size={14} className="absolute -top-1 -right-1 text-yellow-300 animate-pulse" />}
                     </div>
                   ) : (
-                    <div className="relative w-full h-full flex items-center justify-center p-1 sm:p-2">
-                      <img
-                        src="/dice-logo.png"
-                        alt="Stamped"
-                        className={`w-full h-full object-contain ${isNew ? 'animate-bounce' : ''}`}
-                      />
+                    <div className="relative w-full h-full flex items-center justify-center">
+                      <Link size={28} className={`text-brand-500 ${isNew ? 'animate-bounce' : ''}`} />
                     </div>
                   )
                 ) : (

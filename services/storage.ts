@@ -4,10 +4,10 @@ import { User, StampEvent } from '../types';
  * GOOGLE SHEETS / LOCAL STORAGE HYBRID LAYER
  */
 
-const SESSION_KEY = 'dice_current_session_v4';
-const ADMIN_SESSION_KEY = 'dice_admin_authenticated_v4';
-const ADMIN_LOGS_KEY = 'dice_admin_history_v4';
-const SYNC_CHANNEL = new BroadcastChannel('dice_global_sync');
+const SESSION_KEY = 'loyalink_current_session_v4';
+const ADMIN_SESSION_KEY = 'loyalink_admin_authenticated_v4';
+const ADMIN_LOGS_KEY = 'loyalink_admin_history_v4';
+const SYNC_CHANNEL = new BroadcastChannel('loyalink_global_sync');
 
 // --- STATIC CONFIGURATION ---
 const STATIC_API_URL = 'https://script.google.com/macros/s/AKfycbwJUABZ9PsGEv91FjlB33kOAsYsMm6oz77isOwtvw2JQQNSpvtwkBdby2EzyZgB7qcmVg/exec';

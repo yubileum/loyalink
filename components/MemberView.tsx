@@ -98,7 +98,7 @@ export const MemberView: React.FC<MemberViewProps> = ({ currentUser, onLogout })
     });
 
     // Listen for voucher earned events
-    const voucherChannel = new BroadcastChannel('dice_global_sync');
+    const voucherChannel = new BroadcastChannel('loyalink_global_sync');
     const handleVoucherEvent = (event: MessageEvent) => {
       if (event.data?.type === 'VOUCHER_EARNED' && event.data?.voucher) {
         handleVoucherEarned(event.data.voucher);

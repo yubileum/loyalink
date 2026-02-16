@@ -229,7 +229,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ onLogout }) => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `dice_report_${new Date().toISOString().split('T')[0]}.csv`;
+        a.download = `loyalink_report_${new Date().toISOString().split('T')[0]}.csv`;
         a.click();
     };
 
@@ -241,7 +241,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ onLogout }) => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `dice_members_${new Date().toISOString().split('T')[0]}.csv`;
+        a.download = `loyalink_members_${new Date().toISOString().split('T')[0]}.csv`;
         a.click();
         setStatus('idle');
     };

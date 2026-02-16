@@ -8,13 +8,13 @@ export interface BrandConfig {
     logoUrl: string;
 }
 
-const BRAND_CONFIG_KEY = 'dice_brand_config';
+const BRAND_CONFIG_KEY = 'loyalink_brand_config';
 
 const DEFAULT_BRAND: BrandConfig = {
-    name: 'Dice',
-    tagline: 'Boardgame & Kitchen',
-    primaryColor: '#006B3F',
-    logoUrl: '/dice-logo.png' // Using the provided PNG file
+    name: 'Loyalink',
+    tagline: 'Loyalty Rewards Platform',
+    primaryColor: '#7C3AED', // Purple for loyalty/premium feel
+    logoUrl: '' // No logo, using text-based branding
 };
 
 // Get current brand configuration
@@ -22,15 +22,7 @@ export const getBrandConfig = (): BrandConfig => {
     try {
         const stored = localStorage.getItem(BRAND_CONFIG_KEY);
         if (stored) {
-            const config = JSON.parse(stored);
-            // Force update to the new local PNG logo if the old path or data URI is present
-            if ((config.logoUrl && !config.logoUrl.startsWith('/dice-logo.png')) || config.tagline !== 'Boardgame & Kitchen') {
-                config.logoUrl = '/dice-logo.png';
-                config.tagline = 'Boardgame & Kitchen';
-                config.primaryColor = '#006B3F';
-                localStorage.setItem(BRAND_CONFIG_KEY, JSON.stringify(config));
-            }
-            return config;
+            return JSON.parse(stored);
         }
     } catch (e) {
         console.error('Failed to load brand config:', e);
