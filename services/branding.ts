@@ -14,7 +14,7 @@ const DEFAULT_BRAND: BrandConfig = {
     name: 'Loyalink',
     tagline: 'Loyalty Rewards Platform',
     primaryColor: '#7C3AED', // Purple for loyalty/premium feel
-    logoUrl: '' // No logo, using text-based branding
+    logoUrl: '/loyalink-logo.png' // Loyalink logo
 };
 
 // Get current brand configuration
@@ -22,7 +22,9 @@ export const getBrandConfig = (): BrandConfig => {
     try {
         const stored = localStorage.getItem(BRAND_CONFIG_KEY);
         if (stored) {
-            return JSON.parse(stored);
+            const parsed = JSON.parse(stored);
+            // Merge with defaults so new defaultfields (like logoUrl) always appear
+            return { ...DEFAULT_BRAND, ...parsed, logoUrl: parsed.logoUrl || DEFAULT_BRAND.logoUrl };
         }
     } catch (e) {
         console.error('Failed to load brand config:', e);

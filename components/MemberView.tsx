@@ -243,7 +243,7 @@ export const MemberView: React.FC<MemberViewProps> = ({ currentUser, onLogout })
         <div className="max-w-2xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             {brandConfig.logoUrl ? (
-              <img src={brandConfig.logoUrl} alt={brandConfig.name} className="h-10 object-contain" />
+              <img src={brandConfig.logoUrl} alt={brandConfig.name} className="max-h-10 w-auto object-contain" />
             ) : (
               <div className="w-10 h-10 bg-gradient-to-br from-brand-600 to-brand-500 rounded-xl flex items-center justify-center shadow-lg shadow-brand-500/30">
                 <span className="text-white font-black text-lg">{brandConfig.name.charAt(0)}</span>

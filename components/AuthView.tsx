@@ -143,7 +143,7 @@ export const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
           {brandConfig.logoUrl ? (
             <div className="mb-4 flex justify-center relative z-20">
               <div className="bg-white p-3 rounded-2xl shadow-xl shadow-black/10 transform hover:scale-105 transition-transform duration-300">
-                <img src={brandConfig.logoUrl} alt={brandConfig.name} className="h-16 object-contain" />
+                <img src={brandConfig.logoUrl} alt={brandConfig.name} className="max-h-16 w-auto object-contain" />
               </div>
             </div>
           ) : (

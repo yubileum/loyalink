@@ -10,7 +10,7 @@ const ADMIN_LOGS_KEY = 'loyalink_admin_history_v4';
 const SYNC_CHANNEL = new BroadcastChannel('loyalink_global_sync');
 
 // --- STATIC CONFIGURATION ---
-const STATIC_API_URL = 'https://script.google.com/macros/s/AKfycbwJUABZ9PsGEv91FjlB33kOAsYsMm6oz77isOwtvw2JQQNSpvtwkBdby2EzyZgB7qcmVg/exec';
+const STATIC_API_URL = 'https://script.google.com/macros/s/AKfycbwCASBjh581s5rqCniT_29YapbxKUdzqKgt5JhNge7jg3Gez_eHc6_ZibxMkXvLyHBP/exec';
 
 export const setApiUrl = (url: string) => {
   console.warn("API URL is static and cannot be changed via client.");

@@ -4,7 +4,7 @@ const STAMP_CONFIG_CACHE_KEY = 'dice_stamp_config_cache_v1';
 const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes (increased from 5)
 
 // API URL - same as storage.ts
-const API_URL = 'https://script.google.com/macros/s/AKfycbwJUABZ9PsGEv91FjlB33kOAsYsMm6oz77isOwtvw2JQQNSpvtwkBdby2EzyZgB7qcmVg/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbwCASBjh581s5rqCniT_29YapbxKUdzqKgt5JhNge7jg3Gez_eHc6_ZibxMkXvLyHBP/exec';
 
 // Default configuration (fallback)
 const DEFAULT_CONFIG: StampConfig = {
