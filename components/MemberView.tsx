@@ -240,18 +240,18 @@ export const MemberView: React.FC<MemberViewProps> = ({ currentUser, onLogout })
 
       {/* Header */}
       <header className="relative z-10 bg-white/80 backdrop-blur-xl border-b border-gray-200/50 sticky top-0 shadow-sm">
-        <div className="max-w-2xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className="max-w-2xl mx-auto px-4 py-2 flex items-center justify-between">
+          <div className="flex items-center gap-2">
             {brandConfig.logoUrl ? (
-              <img src={brandConfig.logoUrl} alt={brandConfig.name} className="max-h-10 w-auto object-contain" />
+              <img src={brandConfig.logoUrl} alt={brandConfig.name} className="max-h-8 w-auto object-contain" />
             ) : (
-              <div className="w-10 h-10 bg-gradient-to-br from-brand-600 to-brand-500 rounded-xl flex items-center justify-center shadow-lg shadow-brand-500/30">
-                <span className="text-white font-black text-lg">{brandConfig.name.charAt(0)}</span>
+              <div className="w-8 h-8 bg-gradient-to-br from-brand-600 to-brand-500 rounded-lg flex items-center justify-center shadow-lg shadow-brand-500/30">
+                <span className="text-white font-black text-sm">{brandConfig.name.charAt(0)}</span>
               </div>
             )}
             <div>
-              <h1 className="font-black text-lg sm:text-xl tracking-tight text-gray-900">{brandConfig.name}</h1>
-              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">{brandConfig.tagline}</p>
+              <h1 className="font-black text-base tracking-tight text-gray-900 leading-none">{brandConfig.name}</h1>
+              <p className="text-[9px] font-bold text-gray-500 uppercase tracking-wider leading-none mt-0.5">{brandConfig.tagline}</p>
             </div>
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
