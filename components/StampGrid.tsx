@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Link, Gift, Sparkles, Star, Zap } from 'lucide-react';
+import { Gift, Sparkles, Star, Zap } from 'lucide-react';
 import { User, StampConfig } from '../types';
 import { getBrandConfig } from '../services/branding';
 import { getStampConfig, fetchStampConfig, isCheckpoint, getCheckpointReward } from '../services/stampConfig';
@@ -38,7 +38,7 @@ export const StampGrid: React.FC<StampGridProps> = ({ user }) => {
   }, [filledSlots]);
 
   return (
-    <div className="w-full bg-white rounded-3xl shadow-xl p-8 border border-gray-200 relative overflow-hidden">
+    <div className="w-full bg-navy-800/60 backdrop-blur-sm rounded-3xl shadow-xl p-8 border border-white/10 relative overflow-hidden">
 
       {/* Celebration Overlay */}
       {newStampIndex !== null && (
@@ -56,11 +56,11 @@ export const StampGrid: React.FC<StampGridProps> = ({ user }) => {
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h3 className="text-xl sm:text-2xl font-black text-gray-900 leading-none flex items-center gap-2">
-            <Star size={20} sm:size={24} className="text-brand-500" />
+          <h3 className="text-xl sm:text-2xl font-black text-white leading-none flex items-center gap-2">
+            <Star size={20} className="text-brand-500" />
             Loyalty Card
           </h3>
-          <p className="text-[10px] sm:text-sm text-gray-600 font-medium mt-1.5">Collect {totalSlots} stamps for your reward</p>
+          <p className="text-[10px] sm:text-sm text-gray-400 font-medium mt-1.5">Collect {totalSlots} stamps for your reward</p>
         </div>
         <div className="bg-gradient-to-br from-brand-500 to-brand-600 text-white px-3 py-2 sm:px-5 sm:py-3 rounded-2xl shadow-lg shadow-brand-500/30">
           <p className="text-[10px] font-bold opacity-90">Progress</p>
@@ -113,12 +113,16 @@ export const StampGrid: React.FC<StampGridProps> = ({ user }) => {
                     </div>
                   ) : isLast ? (
                     <div className="relative">
-                      <Gift size={28} className={isNew ? 'text-white animate-bounce' : 'animate-pulse'} />
-                      {!isNew && <Sparkles size={14} className="absolute -top-1 -right-1 text-yellow-300 animate-pulse" />}
+                      <Gift size={28} className={isNew ? 'text-white animate-bounce' : 'animate-pulse text-brand-500'} />
+                      {!isNew && <Sparkles size={14} className="absolute -top-1 -right-1 text-brand-400 animate-pulse" />}
                     </div>
                   ) : (
-                    <div className="relative w-full h-full flex items-center justify-center">
-                      <Link size={28} className={`text-brand-500 ${isNew ? 'animate-bounce' : ''}`} />
+                    <div className="relative w-full h-full flex items-center justify-center p-1">
+                      <img
+                        src="/Vaporta Logo.png"
+                        alt="stamp"
+                        className={`w-full h-full object-contain drop-shadow-sm ${isNew ? 'animate-bounce' : ''}`}
+                      />
                     </div>
                   )
                 ) : (
@@ -152,17 +156,17 @@ export const StampGrid: React.FC<StampGridProps> = ({ user }) => {
             </div>
           </div>
         ) : (
-          <div className="p-5 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl border border-gray-200">
+          <div className="p-5 bg-navy-700/60 rounded-2xl border border-white/10">
             <div className="flex items-center justify-center gap-2 mb-2">
               <Zap size={18} className="text-brand-500" />
-              <p className="text-gray-900 font-black text-base sm:text-lg">
+              <p className="text-white font-black text-base sm:text-lg">
                 {nextCheckpoint
                   ? `${nextCheckpoint.stampCount - filledSlots} more stamp${nextCheckpoint.stampCount - filledSlots !== 1 ? 's' : ''} to get ${nextCheckpoint.reward}!`
                   : `${totalSlots - filledSlots} stamp${totalSlots - filledSlots !== 1 ? 's' : ''} to go!`
                 }
               </p>
             </div>
-            <p className="text-sm text-gray-600 font-medium">
+            <p className="text-sm text-gray-400 font-medium">
               {nextCheckpoint
                 ? `Next milestone at ${nextCheckpoint.stampCount} stamps`
                 : 'Keep collecting to unlock your reward'

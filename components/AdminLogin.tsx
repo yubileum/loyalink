@@ -58,19 +58,20 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
 
     return (
         <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-700 ring-1 ring-black/5 my-8">
-            {/* Header with gradient */}
-            <div className="relative p-8 text-center overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+            <div className="relative p-10 text-center overflow-hidden bg-gradient-to-br from-navy-900 via-navy-800 to-navy-700">
                 {/* Animated background elements */}
-                <div className="absolute top-0 right-1/4 w-72 h-72 bg-brand-500/10 rounded-full blur-3xl animate-pulse" />
-                <div className="absolute -bottom-10 -left-10 w-64 h-64 bg-brand-600/10 rounded-full blur-3xl" />
+                <div className="absolute top-0 right-1/4 w-72 h-72 bg-brand-500/15 rounded-full blur-3xl animate-pulse" />
+                <div className="absolute -bottom-10 -left-10 w-64 h-64 bg-brand-500/10 rounded-full blur-3xl" />
 
                 <div className="relative z-10">
-                    <div className="w-20 h-20 bg-gradient-to-br from-brand-500 to-brand-600 backdrop-blur-xl rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-2xl ring-4 ring-white/10 transform hover:scale-110 transition-transform duration-300">
-                        <Shield size={40} className="text-white drop-shadow-lg" />
+                    <div className="flex justify-center mb-4">
+                        <div className="bg-navy-700/80 p-1.5 rounded-2xl shadow-2xl ring-1 ring-white/15 transform hover:scale-105 transition-transform duration-300" style={{ boxShadow: '0 0 30px rgba(245,166,35,0.15), 0 20px 40px rgba(0,0,0,0.3)' }}>
+                            <img src="/Vaporta Logo.png" alt="Vaporta" className="w-20 h-20 object-contain" />
+                        </div>
                     </div>
-                    <h1 className="text-4xl font-black text-white mb-2 tracking-tight drop-shadow-lg">{brandConfig.name}</h1>
-                    <p className="text-white/80 font-bold opacity-90 uppercase tracking-widest text-xs flex items-center justify-center gap-2">
-                        <Sparkles size={12} />
+                    <h1 className="text-4xl font-black text-white mb-1.5 tracking-wide drop-shadow-lg font-montserrat uppercase">{brandConfig.name}</h1>
+                    <p className="text-brand-400/90 font-bold uppercase tracking-widest text-[10px] flex items-center justify-center gap-1.5">
+                        <Sparkles size={10} />
                         Admin Access Portal
                     </p>
                 </div>

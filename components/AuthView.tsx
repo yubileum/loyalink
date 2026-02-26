@@ -132,28 +132,29 @@ export const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
   };
 
   return (
-    <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-700 ring-1 ring-black/5 my-8 backdrop-blur-xl">
+    <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-700 ring-1 ring-black/5 my-8">
       {/* Header with gradient */}
-      <div className="relative p-8 text-center overflow-hidden bg-gradient-to-br from-brand-600 via-brand-500 to-brand-700">
-        {/* Animated background elements */}
-        <div className="absolute top-0 left-1/4 w-72 h-72 bg-white/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute -bottom-10 -right-10 w-64 h-64 bg-brand-400/20 rounded-full blur-3xl" />
+      <div className="relative px-8 pt-10 pb-8 text-center overflow-hidden bg-gradient-to-br from-navy-900 via-navy-800 to-navy-700">
+        {/* Animated background glows */}
+        <div className="absolute top-0 left-1/4 w-72 h-72 bg-brand-500/15 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute -bottom-10 -right-10 w-64 h-64 bg-brand-500/10 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-0 w-48 h-48 bg-navy-500/20 rounded-full blur-2xl" />
 
         <div className="relative z-10">
           {brandConfig.logoUrl ? (
-            <div className="mb-4 flex justify-center relative z-20">
-              <div className="bg-white p-3 rounded-2xl shadow-xl shadow-black/10 transform hover:scale-105 transition-transform duration-300">
-                <img src={brandConfig.logoUrl} alt={brandConfig.name} className="max-h-16 w-auto object-contain" />
+            <div className="mb-4 flex justify-center">
+              <div className="bg-navy-700/80 p-1.5 rounded-2xl shadow-2xl shadow-black/30 ring-1 ring-white/15 ring-offset-0 transform hover:scale-105 transition-transform duration-300" style={{ boxShadow: '0 0 30px rgba(245,166,35,0.15), 0 20px 40px rgba(0,0,0,0.3)' }}>
+                <img src={brandConfig.logoUrl} alt={brandConfig.name} className="h-20 w-20 object-contain" />
               </div>
             </div>
           ) : (
-            <div className="w-20 h-20 bg-white/20 backdrop-blur-xl rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-2xl ring-1 ring-white/30 transform hover:scale-110 transition-transform duration-300">
-              <Link size={40} className="text-white drop-shadow-lg" />
+            <div className="w-20 h-20 bg-brand-500/20 backdrop-blur-xl rounded-2xl flex items-center justify-center mx-auto mb-4 ring-1 ring-brand-500/30 shadow-2xl">
+              <Link size={40} className="text-brand-400" />
             </div>
           )}
-          <h1 className="text-4xl font-black text-white mb-2 tracking-tight drop-shadow-lg">{brandConfig.name}</h1>
-          <p className="text-white/90 font-bold opacity-90 uppercase tracking-widest text-xs flex items-center justify-center gap-2">
-            <Sparkles size={12} />
+          <h1 className="text-4xl font-black text-white mb-1.5 tracking-wide drop-shadow-lg font-montserrat uppercase letter-spacing-widest">{brandConfig.name}</h1>
+          <p className="text-brand-400/90 font-bold uppercase tracking-widest text-[10px] flex items-center justify-center gap-1.5">
+            <Sparkles size={10} />
             {isRegistering ? 'New Member Enrollment' : brandConfig.tagline}
           </p>
         </div>
@@ -341,22 +342,23 @@ export const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-700 hover:to-brand-600 text-white font-black text-lg py-4 px-6 rounded-xl shadow-xl shadow-brand-500/30 flex items-center justify-center gap-3 transition-all active:scale-[0.98] mt-6 disabled:opacity-50 disabled:cursor-not-allowed group relative overflow-hidden"
+            className="w-full bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white font-black text-base py-4 px-6 rounded-2xl shadow-xl shadow-brand-500/25 flex items-center justify-center gap-3 transition-all active:scale-[0.98] mt-2 disabled:opacity-50 disabled:cursor-not-allowed group relative overflow-hidden"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/15 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
             {isLoading ? (
-              <Loader2 className="animate-spin" size={24} />
+              <Loader2 className="animate-spin" size={22} />
             ) : (
               <>
-                <span className="relative">{isRegistering ? 'Create Profile' : 'Sign In'}</span>
-                <ArrowRight size={22} className="relative group-hover:translate-x-1 transition-transform" />
+                <span className="relative font-montserrat tracking-wider">{isRegistering ? 'Create Profile' : 'Sign In'}</span>
+                <ArrowRight size={20} className="relative group-hover:translate-x-1 transition-transform" />
               </>
             )}
           </button>
         </form>
 
-        <div className="mt-8 pt-6 border-t border-gray-200">
+        <div className="mt-6 pt-5 border-t border-gray-100">
           <button
+            type="button"
             onClick={() => {
               setIsRegistering(!isRegistering);
               setError('');
@@ -367,7 +369,7 @@ export const AuthView: React.FC<AuthViewProps> = ({ onLogin }) => {
               setEmail('');
               setAddress('');
             }}
-            className="text-sm font-black text-brand-600 hover:text-brand-700 flex items-center justify-center gap-2 mx-auto py-2 px-6 rounded-xl hover:bg-brand-50 transition-all uppercase tracking-wider group"
+            className="text-xs font-black text-brand-600 hover:text-brand-700 flex items-center justify-center gap-2 mx-auto py-2 px-6 rounded-xl hover:bg-brand-50 transition-all uppercase tracking-widest group font-montserrat"
           >
             <span className="group-hover:scale-110 transition-transform inline-block">
               {isRegistering ? '←' : '→'}

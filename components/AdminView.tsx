@@ -229,7 +229,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ onLogout }) => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `loyalink_report_${new Date().toISOString().split('T')[0]}.csv`;
+        a.download = `vaporta_report_${new Date().toISOString().split('T')[0]}.csv`;
         a.click();
     };
 
@@ -241,7 +241,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ onLogout }) => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `loyalink_members_${new Date().toISOString().split('T')[0]}.csv`;
+        a.download = `vaporta_members_${new Date().toISOString().split('T')[0]}.csv`;
         a.click();
         setStatus('idle');
     };
@@ -257,11 +257,19 @@ export const AdminView: React.FC<AdminViewProps> = ({ onLogout }) => {
             <header className="relative z-10 bg-gray-900/80 backdrop-blur-xl border-b border-gray-700/50 sticky top-0 shadow-xl">
                 <div className="max-w-2xl mx-auto px-4 py-2 flex items-center justify-between">
                     <div className="flex items-center gap-2">
+<<<<<<< HEAD
                         <div className="w-8 h-8 bg-gradient-to-br from-brand-500 to-brand-600 rounded-lg flex items-center justify-center shadow-lg shadow-brand-500/30">
                             <Cloud size={16} className="text-white" />
                         </div>
                         <div>
                             <h1 className="font-black text-base text-white leading-none">{brandConfig.name}</h1>
+=======
+                        <div className="w-10 h-10 bg-navy-700 rounded-xl flex items-center justify-center shadow-lg ring-1 ring-white/10">
+                            <img src="/Vaporta Logo.png" alt="Vaporta" className="w-9 h-9 object-contain" />
+                        </div>
+                        <div>
+                            <h1 className="font-black text-base text-white leading-none font-montserrat uppercase">{brandConfig.name}</h1>
+>>>>>>> 1a3e96020b6229ebaa654ad6a1b863ca2752624f
                             <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider leading-none mt-0.5">Admin Console</p>
                         </div>
                     </div>
