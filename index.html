@@ -4,39 +4,56 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="/Vaporta Logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap"
+  <link
+    href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800;900&family=Barlow:wght@400;500;600;700;800;900&display=swap"
     rel="stylesheet">
-  <title>Loyalink - Loyalty Rewards Platform</title>
+  <style>
+    @font-face {
+      font-family: 'Montserrat';
+      src: url('/Montserrat-Bold.ttf') format('truetype');
+      font-weight: 700;
+      font-style: normal;
+      font-display: swap;
+    }
+  </style>
+  <title>Vaporta - Loyalty Rewards Platform</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
       theme: {
         extend: {
           fontFamily: {
-            sans: ['Poppins', 'Inter', 'system-ui', 'sans-serif'],
+            sans: ['Montserrat', 'Barlow', 'system-ui', 'sans-serif'],
+            condensed: ['Montserrat', 'Barlow Condensed', 'system-ui', 'sans-serif'],
+            montserrat: ['Montserrat', 'sans-serif'],
           },
           colors: {
             brand: {
-              50: '#faf5ff',
-              100: '#f3e8ff',
-              200: '#e9d5ff',
-              400: '#a78bfa',
-              500: '#7C3AED',
-              600: '#7c3aed',
-              700: '#6d28d9',
-              800: '#5b21b6',
-              900: '#4c1d95',
+              50: '#fffbeb',
+              100: '#fef3c7',
+              200: '#fde68a',
+              400: '#fbbf24',
+              500: '#F5A623',
+              600: '#d97706',
+              700: '#b45309',
+              800: '#92400e',
+              900: '#78350f',
             },
-            coffee: {
-              50: '#fcf9f4',
-              100: '#f5ebe0',
-              200: '#e3d5c6',
-              300: '#d1bfa8',
-              800: '#4a3b32',
-              900: '#2d241e',
-              950: '#1a1410',
+            navy: {
+              50: '#eef1f8',
+              100: '#d5ddf0',
+              200: '#adbce0',
+              300: '#7a93c9',
+              400: '#4d6fb3',
+              500: '#2d4f9a',
+              600: '#1B2340',
+              700: '#152038',
+              800: '#0f1a2f',
+              900: '#0a1220',
+              950: '#060c17',
             }
           }
         }
@@ -60,7 +77,7 @@
   <script type="module" src="/index.tsx"></script>
 </head>
 
-<body class="bg-gray-50 text-gray-900 antialiased selection:bg-brand-100 selection:text-brand-900">
+<body class="bg-navy-600 text-white antialiased selection:bg-brand-500/30 selection:text-brand-500">
   <div id="root"></div>
 </body>
 

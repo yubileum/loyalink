@@ -8,13 +8,13 @@ export interface BrandConfig {
     logoUrl: string;
 }
 
-const BRAND_CONFIG_KEY = 'loyalink_brand_config';
+const BRAND_CONFIG_KEY = 'vaporta_brand_config';
 
 const DEFAULT_BRAND: BrandConfig = {
-    name: 'Loyalink',
+    name: 'Vaporta',
     tagline: 'Loyalty Rewards Platform',
-    primaryColor: '#7C3AED', // Purple for loyalty/premium feel
-    logoUrl: '/loyalink-logo.png' // Loyalink logo
+    primaryColor: '#F5A623', // Vaporta amber
+    logoUrl: '/Vaporta Logo.png' // Vaporta icon
 };
 
 // Get current brand configuration

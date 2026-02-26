@@ -98,7 +98,7 @@ export const MemberView: React.FC<MemberViewProps> = ({ currentUser, onLogout })
     });
 
     // Listen for voucher earned events
-    const voucherChannel = new BroadcastChannel('loyalink_global_sync');
+    const voucherChannel = new BroadcastChannel('vaporta_global_sync');
     const handleVoucherEvent = (event: MessageEvent) => {
       if (event.data?.type === 'VOUCHER_EARNED' && event.data?.voucher) {
         handleVoucherEarned(event.data.voucher);
@@ -233,25 +233,24 @@ export const MemberView: React.FC<MemberViewProps> = ({ currentUser, onLogout })
   const stampsRemaining = user.maxStamps - user.stamps;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex flex-col relative overflow-hidden">
-      {/* Animated background elements */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-brand-500/5 to-brand-600/10 rounded-full blur-3xl animate-pulse"></div>
-      <div className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-brand-400/5 to-brand-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+    <div className="min-h-screen bg-gradient-to-br from-navy-900 via-navy-800 to-navy-700 flex flex-col relative overflow-hidden">
+      <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-brand-500/5 to-brand-500/10 rounded-full blur-3xl animate-pulse"></div>
+      <div className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-brand-500/5 to-brand-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
 
       {/* Header */}
-      <header className="relative z-10 bg-white/80 backdrop-blur-xl border-b border-gray-200/50 sticky top-0 shadow-sm">
-        <div className="max-w-2xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+      <header className="relative z-10 bg-navy-800/80 backdrop-blur-xl border-b border-white/10 sticky top-0 shadow-xl">
+        <div className="max-w-2xl mx-auto px-4 py-2 flex items-center justify-between">
+          <div className="flex items-center gap-2">
             {brandConfig.logoUrl ? (
               <img src={brandConfig.logoUrl} alt={brandConfig.name} className="max-h-10 w-auto object-contain" />
             ) : (
-              <div className="w-10 h-10 bg-gradient-to-br from-brand-600 to-brand-500 rounded-xl flex items-center justify-center shadow-lg shadow-brand-500/30">
-                <span className="text-white font-black text-lg">{brandConfig.name.charAt(0)}</span>
+              <div className="w-10 h-10 bg-navy-700 rounded-xl flex items-center justify-center ring-1 ring-white/10">
+                <span className="text-brand-400 font-black text-sm">{brandConfig.name.charAt(0)}</span>
               </div>
             )}
             <div>
-              <h1 className="font-black text-lg sm:text-xl tracking-tight text-gray-900">{brandConfig.name}</h1>
-              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">{brandConfig.tagline}</p>
+              <h1 className="font-black text-base tracking-tight text-white leading-none font-montserrat uppercase">{brandConfig.name}</h1>
+              <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider leading-none mt-0.5">{brandConfig.tagline}</p>
             </div>
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
@@ -270,7 +269,7 @@ export const MemberView: React.FC<MemberViewProps> = ({ currentUser, onLogout })
             </button>
             <button
               onClick={onLogout}
-              className="px-3 py-2 sm:px-4 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-xl flex items-center gap-2 text-sm font-bold transition-all"
+              className="px-3 py-2 sm:px-4 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-xl flex items-center gap-2 text-sm font-bold transition-all"
             >
               <LogOut size={16} /> <span className="hidden sm:inline">Logout</span>
             </button>
@@ -289,7 +288,7 @@ export const MemberView: React.FC<MemberViewProps> = ({ currentUser, onLogout })
         )}
 
         {/* Hero Card - User Info & Progress */}
-        <div className="bg-gradient-to-br from-brand-600 via-brand-500 to-brand-700 rounded-3xl shadow-2xl shadow-brand-500/30 overflow-hidden relative">
+        <div className="bg-gradient-to-br from-navy-700 via-navy-600 to-navy-500 rounded-3xl shadow-2xl shadow-navy-900/50 overflow-hidden relative ring-1 ring-white/10">
           {/* Animated background pattern */}
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMTZjMC0yLjIxIDEuNzktNCA0LTRzNCAxLjc5IDQgNC0xLjc5IDQtNCA0LTQtMS43OS00LTR6bTAgMjRjMC0yLjIxIDEuNzktNCA0LTRzNCAxLjc5IDQgNC0xLjc5IDQtNCA0LTQtMS43OS00LTR6TTEyIDE2YzAtMi4yMSAxLjc5LTQgNC00czQgMS43OSA0IDQtMS43OSA0LTQgNC00LTEuNzktNC00em0wIDI0YzAtMi4yMSAxLjc5LTQgNC00czQgMS43OSA0IDQtMS43OSA0LTQgNC00LTEuNzktNC00eiIvPjwvZz48L2c+PC9zdmc+')] opacity-30"></div>
 
@@ -333,7 +332,7 @@ export const MemberView: React.FC<MemberViewProps> = ({ currentUser, onLogout })
               {/* Progress Bar */}
               <div className="relative h-4 bg-white/20 rounded-full overflow-hidden backdrop-blur-sm">
                 <div
-                  className="absolute inset-y-0 left-0 bg-gradient-to-r from-white to-white/90 rounded-full transition-all duration-1000 ease-out shadow-lg"
+                  className="absolute inset-y-0 left-0 bg-gradient-to-r from-brand-400 to-brand-500 rounded-full transition-all duration-1000 ease-out shadow-lg"
                   style={{ width: `${progress}%` }}
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/40 to-white/0 animate-shimmer"></div>

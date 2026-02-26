@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <!-- Vaporta V-shape logo with lightning bolt -->
+  <!-- Top-left trapezoid/arrow shape -->
+  <path d="M8 14 L44 14 Q47 14 45.5 17 L35 38 Q33.5 41 30.5 41 L18 41 Q15 41 16.5 38 L26 17 Q27.5 14 30 14 Z" 
+        fill="none" stroke="#F5A623" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+  <!-- Top-right trapezoid/arrow shape -->
+  <path d="M56 14 L92 14 Q94.5 14 93 17 L82.5 38 Q81 41 78 41 L65.5 41 Q62.5 41 64 38 L74.5 17 Q76 14 78.5 14 Z"
+        fill="none" stroke="#F5A623" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+  <!-- Bottom center V-point with lightning bolt cutout -->
+  <!-- Outer V shape -->
+  <path d="M22 47 L78 47 L60 82 Q58 86 50 86 Q42 86 40 82 Z"
+        fill="none" stroke="#F5A623" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+  <!-- Lightning bolt (solid fill) inside the bottom V -->
+  <path d="M54 50 L44 68 L50 65 L45 83 L62 62 L55 65 Z"
+        fill="#F5A623"/>
+</svg>

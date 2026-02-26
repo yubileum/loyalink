@@ -229,7 +229,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ onLogout }) => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `loyalink_report_${new Date().toISOString().split('T')[0]}.csv`;
+        a.download = `vaporta_report_${new Date().toISOString().split('T')[0]}.csv`;
         a.click();
     };
 
@@ -241,7 +241,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ onLogout }) => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `loyalink_members_${new Date().toISOString().split('T')[0]}.csv`;
+        a.download = `vaporta_members_${new Date().toISOString().split('T')[0]}.csv`;
         a.click();
         setStatus('idle');
     };
@@ -255,36 +255,36 @@ export const AdminView: React.FC<AdminViewProps> = ({ onLogout }) => {
 
             {/* Header */}
             <header className="relative z-10 bg-gray-900/80 backdrop-blur-xl border-b border-gray-700/50 sticky top-0 shadow-xl">
-                <div className="max-w-2xl mx-auto px-6 py-4 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-brand-500 to-brand-600 rounded-xl flex items-center justify-center shadow-lg shadow-brand-500/30">
-                            <Cloud size={20} className="text-white" />
+                <div className="max-w-2xl mx-auto px-4 py-2 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <div className="w-10 h-10 bg-navy-700 rounded-xl flex items-center justify-center shadow-lg ring-1 ring-white/10">
+                            <img src="/Vaporta Logo.png" alt="Vaporta" className="w-9 h-9 object-contain" />
                         </div>
                         <div>
-                            <h1 className="font-black text-xl text-white">{brandConfig.name}</h1>
-                            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Admin Console</p>
+                            <h1 className="font-black text-base text-white leading-none font-montserrat uppercase">{brandConfig.name}</h1>
+                            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider leading-none mt-0.5">Admin Console</p>
                         </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
                         <button
                             onClick={() => setShowStampConfig(true)}
-                            className="p-2.5 text-gray-400 hover:text-white hover:bg-white/10 rounded-xl transition-all"
+                            className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-all"
                             title="Stamp Configuration"
                         >
-                            <Award size={18} />
+                            <Award size={16} />
                         </button>
                         <button
                             onClick={() => setShowBrandSettings(true)}
-                            className="p-2.5 text-gray-400 hover:text-white hover:bg-white/10 rounded-xl transition-all"
+                            className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-all"
                             title="Brand Settings"
                         >
-                            <Palette size={18} />
+                            <Palette size={16} />
                         </button>
                         <button
                             onClick={onLogout}
-                            className="px-4 py-2.5 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all flex items-center gap-2 font-bold"
+                            className="px-3 py-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all flex items-center gap-1.5 font-bold text-sm"
                         >
-                            <LogOut size={18} />
+                            <LogOut size={15} />
                             Logout
                         </button>
                     </div>

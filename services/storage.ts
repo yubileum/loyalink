@@ -4,13 +4,13 @@ import { User, StampEvent } from '../types';
  * GOOGLE SHEETS / LOCAL STORAGE HYBRID LAYER
  */
 
-const SESSION_KEY = 'loyalink_current_session_v4';
-const ADMIN_SESSION_KEY = 'loyalink_admin_authenticated_v4';
-const ADMIN_LOGS_KEY = 'loyalink_admin_history_v4';
-const SYNC_CHANNEL = new BroadcastChannel('loyalink_global_sync');
+const SESSION_KEY = 'vaporta_current_session_v4';
+const ADMIN_SESSION_KEY = 'vaporta_admin_authenticated_v4';
+const ADMIN_LOGS_KEY = 'vaporta_admin_history_v4';
+const SYNC_CHANNEL = new BroadcastChannel('vaporta_global_sync');
 
 // --- STATIC CONFIGURATION ---
-const STATIC_API_URL = 'https://script.google.com/macros/s/AKfycbwCASBjh581s5rqCniT_29YapbxKUdzqKgt5JhNge7jg3Gez_eHc6_ZibxMkXvLyHBP/exec';
+const STATIC_API_URL = 'https://script.google.com/macros/s/AKfycbyvLk7awtZ-vte90MdTy9fS1pKmoBuWCLhNkYyKjBOyP3xQoIv7uzFTTj8yEDGaXqv5/exec';
 
 export const setApiUrl = (url: string) => {
   console.warn("API URL is static and cannot be changed via client.");
